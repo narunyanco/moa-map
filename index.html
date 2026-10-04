@@ -1,0 +1,1686 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>作用機序マップ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+Antique:wght@700;900&display=swap">
+<style>
+/* Layout: 実験ノート風。左に病態図（臓器・細胞の区画に薬剤チップを配置）、右に機序カード。スマホでは縦積み。 */
+:root{
+  --paper:#F2F5F4; --card:#FFFFFF; --ink:#14232A; --muted:#566A70; --line:#C9D4D2; --zone:#E6ECEB;
+  --sel:#2443C4; --sel-soft:#DDE4FB;
+  --ev-est:#2E6E5A; --ev-deb:#B36A00; --ok:#1F7A4D; --warn:#9A5B00; --none:#7A8790;
+  --hc:#3B5862; --lc:#A9C0C5; --alt:#8C4FB0; --pay:#C77700;
+  --m1:#3B5862; --m2:#2E8A6E; --m3:#2443C4; --m4:#8C4FB0; --m5:#C77700; --m6:#B0413E;
+  --f-disp:"Zen Kaku Gothic Antique","Hiragino Sans","Noto Sans JP",sans-serif;
+  --f-body:"IBM Plex Sans JP","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0F1719; --card:#172226; --ink:#E3ECEA; --muted:#93A6AA; --line:#2E3E42; --zone:#1B282C;
+  --sel:#8EA6FF; --sel-soft:#24305E; --ev-est:#62C2A2; --ev-deb:#F0A646; --ok:#5ACB8E; --warn:#F0A646; --none:#8796A0; --hc:#9DBCC4; --lc:#4A6066; --alt:#C59BEA; --pay:#F0A646; --m1:#9DBCC4; --m2:#5FC9A6; --m3:#8EA6FF; --m4:#C59BEA; --m5:#F0A646; --m6:#F08A85; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0F1719; --card:#172226; --ink:#E3ECEA; --muted:#93A6AA; --line:#2E3E42; --zone:#1B282C;
+  --sel:#8EA6FF; --sel-soft:#24305E; --ev-est:#62C2A2; --ev-deb:#F0A646; --ok:#5ACB8E; --warn:#F0A646; --none:#8796A0; --hc:#9DBCC4; --lc:#4A6066; --alt:#C59BEA; --pay:#F0A646; --m1:#9DBCC4; --m2:#5FC9A6; --m3:#8EA6FF; --m4:#C59BEA; --m5:#F0A646; --m6:#F08A85; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:20px 48px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:16px}
+h1{font-family:var(--f-disp);font-weight:900;font-size:clamp(26px,5vw,36px);line-height:1.15;margin:0;letter-spacing:.01em;text-wrap:balance}
+.stamp{font-family:var(--f-mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.views{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.vtab{font:inherit;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:10px 14px;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
+.vtab b{font-family:var(--f-disp);font-size:17px;font-weight:900}
+.vtab span{font-size:12px;color:var(--muted)}
+.vtab[aria-selected="true"]{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.vtab[aria-selected="true"] span{color:var(--paper);opacity:.8}
+.vtab:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+.tab{font:inherit;font-weight:700;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:8px 14px;cursor:pointer;font-size:16px}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--sel)}
+.tab:focus-visible,.fbtn:focus-visible,.chip:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+.intro{max-width:68ch;color:var(--muted);margin:0 0 14px;font-size:14px}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.fbtn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.fbtn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.figure{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:8px}
+.figure svg{display:block;width:100%;height:auto;max-width:420px;margin:0 auto}
+.organ{fill:var(--zone);stroke:var(--line);stroke-width:1}
+.cellwall{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:0}
+.zoneline{fill:none;stroke:var(--line);stroke-dasharray:3 3}
+.otitle{font-family:var(--f-disp);font-weight:700;font-size:12.5px;fill:var(--ink)}
+.osub{font-size:9.5px;fill:var(--muted)}
+.flow{stroke:var(--muted);stroke-width:1.2;fill:none}
+.flowd{stroke:var(--muted);stroke-width:1.2;fill:none;stroke-dasharray:4 3}
+.flabel{font-size:9.5px;fill:var(--muted)}
+.blood{fill:var(--sel-soft);stroke:var(--sel);stroke-width:1}
+.bloodt{font-family:var(--f-disp);font-weight:700;font-size:12px;fill:var(--ink)}
+.chip{cursor:pointer;outline:none}
+.chip rect{fill:var(--card);stroke:var(--line);stroke-width:1;transition:fill .15s}
+.chip text{font-family:var(--f-body);font-size:11px;fill:var(--ink);font-weight:500}
+.chip:hover rect{stroke:var(--sel)}
+.chip.sel rect{fill:var(--sel);stroke:var(--sel)}
+.chip.sel text{fill:var(--card)}
+.chip.dim{opacity:.22}
+.dot-est{fill:var(--ev-est)} .dot-deb{fill:var(--ev-deb)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;color:var(--muted);padding:8px 6px 2px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+/* detail */
+.detail{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px 20px;min-width:0}
+.detail h2{font-family:var(--f-disp);font-weight:900;font-size:24px;margin:0;line-height:1.25;text-wrap:balance}
+.en{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);margin:2px 0 10px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.badge{font-size:12px;border-radius:3px;padding:1px 8px;border:1px solid var(--line);color:var(--ink)}
+.b-label{border-color:var(--ok);color:var(--ok)} .b-review{border-color:var(--warn);color:var(--warn)} .b-none{border-color:var(--none);color:var(--none)}
+.b-deb{background:var(--ev-deb);border-color:var(--ev-deb);color:var(--card)}
+dl{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:8px 14px;margin:0}
+dt{font-size:12px;color:var(--muted);letter-spacing:.06em;padding-top:2px}
+dd{margin:0;min-width:0}
+.mono{font-family:var(--f-mono);font-size:13px}
+.drugs{display:flex;flex-direction:column;gap:4px;padding:0;margin:0;list-style:none}
+.drugs li{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.drugs a,.src a{color:var(--sel);font-size:12px;text-decoration-thickness:1px;text-underline-offset:2px}
+.src{padding-left:1.1em;margin:0;font-size:13px}
+.src li{margin-bottom:3px}
+.src .kind{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-right:6px}
+.caution{border-left:3px solid var(--ev-deb);padding-left:10px}
+.method{margin-top:36px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}
+.method h3{font-family:var(--f-disp);font-size:15px;margin:0 0 4px}
+.method p{margin:0;font-size:13.5px;color:var(--muted)}
+.sectitle{font-family:var(--f-disp);font-weight:900;font-size:20px;margin:40px 0 0}
+details{margin-top:20px;font-size:13px}
+summary{cursor:pointer;color:var(--sel)}
+pre{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px;overflow-x:auto;font-family:var(--f-mono);font-size:11.5px;line-height:1.5;max-height:420px}
+.disclaimer{font-size:12px;color:var(--muted);margin-top:24px;max-width:72ch}
+
+/* mechanism figures */
+.mech{margin:0 0 16px;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.mech svg,.mfig svg{display:block;width:100%;height:auto;max-width:460px;margin:0 auto}
+.mech figcaption,.mfig figcaption{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.6}
+.fn rect,.fn ellipse{fill:var(--card);stroke:var(--line);stroke-width:1}
+.fn text{font-size:10px;fill:var(--ink);font-family:var(--f-body)}
+.fn.hit rect,.fn.hit ellipse{fill:var(--sel);stroke:var(--sel)}
+.fn.hit text{fill:var(--card);font-weight:700}
+.fc{fill:none;stroke:var(--muted);stroke-width:1.2}
+.fcfill{fill:var(--zone);stroke:var(--muted);stroke-width:1.2}
+.fct{font-family:var(--f-disp);font-weight:700;font-size:11px;fill:var(--muted)}
+.fl{stroke:var(--muted);fill:none;stroke-width:1.1}
+.fld{stroke:var(--muted);fill:none;stroke-width:1.1;stroke-dasharray:4 3}
+.tx{font-size:10px;fill:var(--muted);font-family:var(--f-body)}
+.txi{font-size:10px;fill:var(--ink);font-family:var(--f-body)}
+.txb{font-size:10.5px;fill:var(--ink);font-weight:700;font-family:var(--f-body)}
+.hc{fill:var(--hc)} .lc{fill:var(--lc)} .cdr{fill:var(--sel)} .alt{fill:var(--alt)} .pay{fill:var(--pay)}
+.strk{stroke:var(--ink);fill:none;stroke-width:1.4} .strk2{stroke:var(--sel);fill:none;stroke-width:2.2}
+.strk3{stroke:var(--pay);fill:none;stroke-width:2.2} .strk4{stroke:var(--alt);fill:none;stroke-width:2.2}
+.bead{fill:var(--card);stroke:var(--muted);stroke-width:1} .bead.hit{fill:var(--sel);stroke:var(--sel)}
+.blob{fill:var(--zone);stroke:var(--muted);stroke-width:1.2} .hole{fill:var(--paper);stroke:var(--muted);stroke-width:1}
+.figchips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;font-size:12px;color:var(--muted)}
+.lchip{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:1px 10px;cursor:pointer}
+.lchip[aria-current="true"]{background:var(--sel);color:var(--card);border-color:var(--sel)}
+.lchip:focus-visible,.tnode:focus-visible,.blink:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+.blink{font-family:inherit;font-size:12px;line-height:inherit;cursor:pointer;background:var(--card)}
+.blink::after{content:" →";color:var(--muted)}
+/* modality view */
+.mgrid{grid-template-columns:minmax(0,280px) minmax(0,1fr)}
+@media (max-width:820px){.mgrid{grid-template-columns:minmax(0,1fr)}}
+.tree{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px 8px}
+.tree ul{list-style:none;margin:0;padding:0}
+.tree ul ul{padding-left:14px;border-left:1px solid var(--line);margin:2px 0 6px 10px}
+.tnode{font:inherit;text-align:left;width:100%;background:none;border:0;border-radius:4px;padding:4px 8px;cursor:pointer;color:var(--ink);display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.tnode:hover{background:var(--zone)}
+.tnode.top{font-family:var(--f-disp);font-weight:700;font-size:15px}
+.tnode .tsub{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);white-space:nowrap}
+.tnode[aria-current="true"]{background:var(--sel);color:var(--card)}
+.tnode[aria-current="true"] .tsub{color:var(--card)}
+.crumb{font-size:12px;color:var(--muted);margin-bottom:2px}
+.crumb button{font:inherit;background:none;border:0;padding:0;color:var(--sel);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.mfig{margin:0 0 16px;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.englist{margin:0;padding-left:1.1em}
+.englist li{margin-bottom:4px}
+.note{font-size:13px;border-left:3px solid var(--sel);padding-left:10px;color:var(--ink)}
+.sizechart{margin-bottom:20px}
+.sizechart h3{font-family:var(--f-disp);font-size:15px;margin:2px 4px 4px}
+.sizechart svg{max-width:640px}
+.sc-grid{stroke:var(--line);stroke-width:1}
+.sc-lab{font-size:10.5px;fill:var(--ink);font-family:var(--f-body)}
+.sc-val{font-size:9.5px;fill:var(--muted);font-family:var(--f-mono)}
+.sc-tick{font-size:9.5px;fill:var(--muted);font-family:var(--f-mono)}
+
+/* levels, overview, stats, flow */
+.levels{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-8px 0 18px}
+.lvlabel{font-size:12px;color:var(--muted);margin-right:4px}
+.lvbtn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:4px 14px;cursor:pointer}
+.lvbtn[aria-checked="true"]{background:var(--sel);border-color:var(--sel);color:var(--card);font-weight:700}
+.lvbtn:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+.tabs{overflow-x:auto;scrollbar-width:thin;white-space:nowrap}
+.tab{flex:0 0 auto}
+.ovgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,380px);gap:20px;align-items:start;margin-bottom:8px}
+@media (max-width:820px){.ovgrid{grid-template-columns:minmax(0,1fr)}}
+.lvintro{margin:0 0 14px;max-width:68ch;font-size:15px}
+.lvtag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--sel);border:1px solid var(--sel);border-radius:3px;padding:0 6px;margin-right:8px;vertical-align:2px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:0}
+.slab{font-size:11.5px;color:var(--muted)}
+.sval{font-family:var(--f-disp);font-weight:900;font-size:21px;line-height:1.3;font-variant-numeric:tabular-nums}
+.smeta{font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:2px}
+.smeta a{color:var(--muted);text-underline-offset:2px}
+.figlabel{font-family:var(--f-disp);font-weight:700;font-size:13px;margin:0 2px 6px;color:var(--ink)}
+.flowfig{margin:0}
+.fnum{font-family:var(--f-mono);font-size:10px;fill:var(--muted)}
+.fn.hit + .fnum{fill:var(--card)}
+.actpill{fill:var(--sel-soft);stroke:var(--sel);stroke-width:1}
+.acttext{font-size:10.5px;fill:var(--ink);font-weight:700;font-family:var(--f-body)}
+.probtext{font-size:10.5px;fill:var(--ev-deb);font-weight:700;font-family:var(--f-body)}
+.lvtext{font-size:15.5px;line-height:1.85;margin:0 0 14px}
+.subhead{font-family:var(--f-disp);font-size:17px;margin:22px 0 8px}
+.hint{font-size:12px;color:var(--muted);margin-top:12px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>作用機序マップ</h1>
+    <div class="stamp">確認日 2026-10-04 · 医療従事者・研究者向け参考資料</div>
+  </header>
+
+  <nav class="views" role="tablist" aria-label="見方の切り替え">
+    <button class="vtab" role="tab" id="v-disease" aria-selected="true" data-v="disease"><b>疾患別</b><span>病態と作用する薬</span></button>
+    <button class="vtab" role="tab" id="v-modality" aria-selected="false" data-v="modality"><b>モダリティ別</b><span>薬の種類と構造</span></button>
+  </nav>
+  <div class="levels" role="radiogroup" aria-label="説明のレベル">
+    <span class="lvlabel">説明のレベル</span>
+    <button class="lvbtn" role="radio" data-l="1" aria-checked="false">中学</button>
+    <button class="lvbtn" role="radio" data-l="2" aria-checked="true">高校</button>
+    <button class="lvbtn" role="radio" data-l="3" aria-checked="false">大学</button>
+    <button class="lvbtn" role="radio" data-l="4" aria-checked="false">専門</button>
+  </div>
+
+  <section id="disView">
+  <div class="tabs" role="tablist" aria-label="疾患" id="dtabs"></div>
+  <div class="ovgrid">
+    <div class="ovtext"><p class="lvintro" id="intro"></p><div class="stats" id="stats"></div></div>
+    <figure class="mech flowfig" id="dflow"></figure>
+  </div>
+  <h3 class="subhead">薬の作用点</h3>
+  <div class="filters" id="filters"></div>
+
+  <div class="grid">
+    <div class="figure">
+      <svg id="map" role="img" aria-label="病態図と薬剤クラスの作用部位"></svg>
+      <div class="legend">
+        <span><i style="background:var(--ev-est)"></i>機序がほぼ確立</span>
+        <span><i style="background:var(--ev-deb)"></i>機序に議論・未解明あり</span>
+        <span>チップをタップで詳細</span>
+      </div>
+    </div>
+    <article class="detail" id="detail" aria-live="polite"></article>
+  </div>
+  </section>
+
+  <section id="modView" hidden>
+    <p class="intro">モダリティは、薬が「どんな種類の物質で、どう標的に届いて作用するか」による分類です。左のツリーから選ぶと、構造の模式図と仕組み、工学的な設計のポイント、疾患タブの関連薬が表示されます。</p>
+    <figure class="figure sizechart">
+      <h3>分子の大きさの比較（対数目盛）</h3>
+      <svg id="sizeChart" role="img" aria-label="代表的な医薬品の分子量の比較"></svg>
+      <figcaption class="tx" style="font-size:12px;color:var(--muted);padding:4px 6px">分子量（Da）の目安。チルゼパチドは米国添付文書の値（4,813.53 Da）。その他は代表的な文献値を丸めた概数です。</figcaption>
+    </figure>
+    <div class="grid mgrid">
+      <nav class="tree" id="tree" aria-label="モダリティの階層"></nav>
+      <article class="detail" id="mdetail" aria-live="polite"></article>
+    </div>
+  </section>
+
+  <h2 class="sectitle">誤情報を減らすための仕組み</h2>
+  <div class="method">
+    <div><h3>照合状態を表示</h3><p>各クラスに「添付文書と照合」「総説で照合」「未照合」のどれかを付けています。未照合は一般的な薬理学知識に基づく記述で、一次資料で確認してから使ってください。</p></div>
+    <div><h3>機序の確度を分ける</h3><p>分子標的が確定しているものと、メトホルミンのように議論が続いているものを色で区別し、議論中の点は本文に書き出しています。</p></div>
+    <div><h3>出典は検索リンク方式</h3><p>薬剤ごとのリンクは DailyMed（米国添付文書）・PubChem・PubMed の検索URLを薬剤名から生成しています。存在しない論文や記事へのリンクが混ざらない構造です。</p></div>
+    <div><h3>やさしい説明も同じ根拠から</h3><p>中学・高校レベルの文章は、大学・専門レベルで確認した内容を言い換えたもので、新しい事実は加えていません。簡単なレベルほど省略があります。</p></div>
+    <div><h3>統計は年と出典つき</h3><p>患者数・死亡数は人口動態統計・患者調査・WHOなどの公表値です。二次資料の場合は「二次」と表示し、独立した統計がないものは「—」として理由を書いています。</p></div>
+    <div><h3>データを分離</h3><p>表示内容はすべてページ下部の JSON データから描画しています。誤りを見つけたら JSON の該当箇所を直せば図と説明の両方に反映されます。</p></div>
+  </div>
+
+  <details>
+    <summary id="jsonsum">この疾患のデータ（JSON）を表示</summary>
+    <pre id="json"></pre>
+  </details>
+
+  <p class="disclaimer">代表薬は例示で、日本での承認状況・適応は薬剤ごとに異なります。臨床判断には最新の添付文書（PMDA）と診療ガイドラインを参照してください。</p>
+</div>
+
+<script>
+const MOD = {sm:"低分子", pep:"ペプチド・タンパク", ab:"抗体", adc:"ADC", cell:"細胞治療"};
+const VER = {
+  label:{t:"添付文書と照合（2026-10-04）", c:"b-label"},
+  review:{t:"総説・解説と照合（2026-10-04）", c:"b-review"},
+  none:{t:"未照合（一般的な薬理学知識）", c:"b-none"}
+};
+
+const DATA = {
+diabetes:{
+  intro:"糖尿病はインスリンの分泌低下や作用不全（インスリン抵抗性）で高血糖が続く代謝疾患です。図は血糖を動かす臓器と、各薬剤クラスが作用する場所を示しています。",
+  default:"tirz",
+  view:[360,418],
+  organs:[
+    {id:"brain", label:"脳", sub:"食欲", x:10,y:10,w:165,h:86},
+    {id:"pancreas", label:"膵臓", sub:"β細胞 / α細胞", x:185,y:10,w:165,h:142},
+    {id:"gut", label:"消化管", sub:"胃・小腸", x:10,y:106,w:165,h:114},
+    {id:"liver", label:"肝臓", sub:"糖新生", x:185,y:162,w:165,h:86},
+    {id:"muscle", label:"筋肉・脂肪", sub:"糖取り込み", x:10,y:322,w:165,h:86},
+    {id:"kidney", label:"腎臓", sub:"近位尿細管", x:185,y:322,w:165,h:86}
+  ],
+  extra:'<rect class="blood" x="100" y="262" width="160" height="44" rx="22"/><text class="bloodt" x="180" y="289" text-anchor="middle">血中グルコース</text>'
+    +'<path class="flow" d="M92 220 L128 262" marker-end="url(#ah)"/><text class="flabel" x="72" y="248">吸収</text>'
+    +'<path class="flow" d="M267 250 L232 262" marker-end="url(#ah)"/><text class="flabel" x="272" y="262">放出</text>'
+    +'<path class="flow" d="M128 306 L92 322" marker-end="url(#ah)"/><text class="flabel" x="50" y="316">取り込み</text>'
+    +'<path class="flow" d="M232 306 L267 322" marker-end="url(#ah)"/><text class="flabel" x="272" y="316">ろ過</text>'
+    +'<path class="flowd" d="M175 140 L187 124" marker-end="url(#ah)"/>',
+  classes:[
+    {id:"insulin", abbr:"インスリン", name:"インスリン製剤", en:"Insulin and analogues", mod:["pep"], ev:"est", ver:"none", sites:["liver","muscle"],
+     target:"インスリン受容体（受容体型チロシンキナーゼ）",
+     moa:"インスリン受容体を活性化し、IRS–PI3K–AKT経路を介して筋肉・脂肪でGLUT4の細胞膜移行を促しグルコース取り込みを増やす。肝臓では糖新生と糖放出を抑え、脂肪分解とケトン体産生も抑える。",
+     drugs:[{n:"インスリン グラルギン",en:"insulin glargine"},{n:"インスリン デグルデク",en:"insulin degludec"},{n:"インスリン アスパルト",en:"insulin aspart"}],
+     caution:"低血糖。1型糖尿病ではインスリンの中断・急な減量が糖尿病性ケトアシドーシスにつながる。",
+     src:[]},
+    {id:"su", abbr:"SU", name:"スルホニル尿素（SU）薬", en:"Sulfonylureas", mod:["sm"], ev:"est", ver:"none", sites:["pancreas"],
+     target:"β細胞 KATPチャネルの SUR1 サブユニット",
+     moa:"SUR1に結合してKATPチャネルを閉じ、β細胞膜を脱分極させる。電位依存性Ca²⁺チャネルが開いてCa²⁺が流入し、インスリンが放出される。血糖値に関係なく分泌を促すため低血糖を起こしやすい。",
+     drugs:[{n:"グリメピリド",en:"glimepiride",sm:1},{n:"グリクラジド",en:"gliclazide",sm:1}],
+     caution:"遷延性低血糖（高齢者・腎機能低下で注意）。体重増加。",src:[]},
+    {id:"glinide", abbr:"グリニド", name:"速効型インスリン分泌促進薬（グリニド薬）", en:"Meglitinides", mod:["sm"], ev:"est", ver:"none", sites:["pancreas"],
+     target:"SUR1（SU薬と同じKATPチャネル）",
+     moa:"SU薬と同様にKATPチャネルを閉じてインスリン分泌を促すが、吸収と消失が速く作用時間が短い。食直前に服用し、食後高血糖を抑える。",
+     drugs:[{n:"ナテグリニド",en:"nateglinide",sm:1},{n:"レパグリニド",en:"repaglinide",sm:1},{n:"ミチグリニド",en:"mitiglinide",sm:1}],
+     caution:"低血糖（SU薬より短時間）。SU薬との併用はしない。",src:[]},
+    {id:"dpp4", abbr:"DPP-4i", name:"DPP-4阻害薬", en:"DPP-4 inhibitors", mod:["sm"], ev:"est", ver:"none", sites:["gut","pancreas"],
+     target:"ジペプチジルペプチダーゼ-4（DPP-4）",
+     moa:"消化管のL細胞・K細胞から分泌されるGLP-1とGIPは、DPP-4によって数分で分解される。DPP-4を阻害して内因性インクレチン濃度を上げ、グルコース依存的にインスリン分泌を促し、グルカゴン分泌を抑える。",
+     drugs:[{n:"シタグリプチン",en:"sitagliptin",sm:1},{n:"リナグリプチン",en:"linagliptin",sm:1},{n:"ビルダグリプチン",en:"vildagliptin",sm:1}],
+     caution:"単独では低血糖が少ない。SU薬との併用で低血糖。類天疱瘡の報告。",src:[]},
+    {id:"glp1", abbr:"GLP-1RA", name:"GLP-1受容体作動薬", en:"GLP-1 receptor agonists", mod:["pep"], ev:"est", ver:"none", sites:["pancreas","gut","brain"],
+     target:"GLP-1受容体（Gs共役型GPCR）",
+     moa:"DPP-4で分解されにくく改変したGLP-1アナログ。β細胞のGLP-1受容体からcAMPを増やしてグルコース依存的にインスリン分泌を増強し、グルカゴンを抑える。胃排出を遅らせ、中枢で食欲を抑える。",
+     drugs:[{n:"セマグルチド",en:"semaglutide"},{n:"デュラグルチド",en:"dulaglutide"},{n:"リラグルチド",en:"liraglutide"}],
+     caution:"悪心・嘔吐などの消化器症状と脱水。膵炎。SU薬・インスリン併用で低血糖。",src:[]},
+    {id:"tirz", abbr:"GIP/GLP-1", name:"GIP/GLP-1受容体作動薬", en:"Dual GIP and GLP-1 receptor agonist", mod:["pep"], ev:"est", ver:"label", sites:["pancreas","gut","brain"],
+     target:"GIP受容体 と GLP-1受容体（両方）",
+     moa:"GIP配列をもとにしたペプチドで、GIP受容体とGLP-1受容体の両方に結合して活性化する。C20脂肪二酸がアルブミンに結合し、半減期は約5日で週1回投与。グルコース依存的に第1相・第2相のインスリン分泌を増強し、グルカゴンを下げる。胃排出を遅らせ（初回投与後が最大で徐々に減弱）、食事摂取量と体重を減らす。",
+     drugs:[{n:"チルゼパチド（マンジャロ）",en:"tirzepatide"}],
+     caution:"SU薬・インスリン併用で低血糖（減量を検討）。嘔吐・下痢による脱水からの急性腎障害。膵炎。米国添付文書では齧歯類の甲状腺C細胞腫瘍に関する枠囲み警告。",
+     src:[{k:"添付文書",t:"MOUNJARO 米国添付文書 12.1 Mechanism of Action（DailyMed）",u:"https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=d2d7da5d-ad07-4228-955f-cf7e355c8cc0"}]},
+    {id:"met", abbr:"BG薬", name:"ビグアナイド薬（メトホルミン）", en:"Biguanides", mod:["sm"], ev:"deb", ver:"review", sites:["liver","gut"],
+     target:"未確定（ミトコンドリア呼吸鎖複合体I、GPD2、リソソームPEN2など候補が複数）",
+     moa:"主に肝臓の糖新生を抑えて血糖を下げる点は共通理解だが、分子標的は確定していない。報告されている機序は、複合体I阻害→AMP上昇→AMPK活性化、AMPを介したcAMP–PKA低下によるグルカゴン作用の抑制、GPD2阻害による酸化還元状態の変化、低濃度でのPEN2–v-ATPaseを介したリソソーム上のAMPK活性化、十二指腸AMPKを起点とする腸–脳–肝経路など。複合体I阻害は臨床濃度より高い濃度で観察されること、AMPK欠損マウスでも効果が残ることが論点になっている。",
+     drugs:[{n:"メトホルミン",en:"metformin",sm:1}],
+     caution:"乳酸アシドーシス（腎機能低下・脱水・ヨード造影剤使用時に注意）。消化器症状。",
+     src:[
+      {k:"総説",t:"［基礎］メトホルミンは酸化還元に依存したメカニズムにより糖新生を阻害する（医薬ジャーナル系 m-review）",u:"https://med.m-review.co.jp/article/detail/J0071_0802_0014-0016"},
+      {k:"解説",t:"メトホルミンのすすめ（新潟市医師会報）",u:"https://www.niigatashi-ishikai.or.jp/newsletter/academic/202110295073.html"},
+      {k:"原著",t:"Duca et al. Nature Medicine 2015 十二指腸AMPK経路（doi:10.1038/nm.3787）",u:"https://doi.org/10.1038/nm.3787"},
+      {k:"解説",t:"低用量メトホルミンとPEN2–リソソームAMPK経路（Nature 2022 論文紹介）",u:"https://lab-brains.as-1.co.jp/enjoy-learn/2022/03/39085/"}]},
+    {id:"tzd", abbr:"TZD", name:"チアゾリジン薬", en:"Thiazolidinediones", mod:["sm"], ev:"est", ver:"none", sites:["muscle","liver"],
+     target:"核内受容体 PPARγ（アゴニスト）",
+     moa:"PPARγを活性化して脂肪細胞の分化と遺伝子発現を変え、小型脂肪細胞を増やしアディポネクチンを増加させる。結果として筋肉・肝臓のインスリン感受性が改善する。",
+     drugs:[{n:"ピオグリタゾン",en:"pioglitazone",sm:1}],
+     caution:"浮腫・体液貯留（心不全患者には禁忌）。体重増加。骨折リスク。",src:[]},
+    {id:"agi", abbr:"α-GI", name:"α-グルコシダーゼ阻害薬", en:"Alpha-glucosidase inhibitors", mod:["sm"], ev:"est", ver:"none", sites:["gut"],
+     target:"小腸刷子縁膜の α-グルコシダーゼ",
+     moa:"二糖類を単糖に分解する酵素を阻害し、小腸での糖の吸収を遅らせて食後高血糖を抑える。食直前に服用する。",
+     drugs:[{n:"アカルボース",en:"acarbose",sm:1},{n:"ボグリボース",en:"voglibose",sm:1},{n:"ミグリトール",en:"miglitol",sm:1}],
+     caution:"腹部膨満・放屁。他剤併用で低血糖が起きた場合、砂糖（二糖）ではなくブドウ糖で対処する。",src:[]},
+    {id:"sglt2", abbr:"SGLT2i", name:"SGLT2阻害薬", en:"SGLT2 inhibitors", mod:["sm"], ev:"est", ver:"none", sites:["kidney"],
+     target:"近位尿細管（S1）の Na⁺/グルコース共輸送体2",
+     moa:"糸球体でろ過されたグルコースの大部分を再吸収するSGLT2を阻害し、尿中にグルコースを排泄させる。作用はインスリン非依存。一部の薬剤は心不全・慢性腎臓病にも適応がある。",
+     drugs:[{n:"エンパグリフロジン",en:"empagliflozin",sm:1},{n:"ダパグリフロジン",en:"dapagliflozin",sm:1},{n:"カナグリフロジン",en:"canagliflozin",sm:1}],
+     caution:"血糖がそれほど高くない状態でのケトアシドーシス（正常血糖DKA）。性器感染症。脱水。",src:[]},
+    {id:"imeg", abbr:"イメグリミン", name:"イメグリミン", en:"Imeglimin", mod:["sm"], ev:"deb", ver:"label", sites:["pancreas","liver","muscle"],
+     target:"ミトコンドリア（添付文書では「想定される」との記載）",
+     moa:"グルコース濃度依存的なインスリン分泌促進と、肝臓の糖新生抑制・骨格筋の糖取り込み改善（インスリン抵抗性改善）で血糖を下げる。日本の添付文書は、作用機序をミトコンドリアへの作用を介するものと「想定」と記載している。報告されている分子機序は、NAMPT発現増加によるNAD⁺生成の促進と、呼吸鎖複合体Iの競合阻害による活性酸素産生の低下。日本で2021年に承認。",
+     drugs:[{n:"イメグリミン（ツイミーグ）",en:"imeglimin",sm:1}],
+     caution:"インスリン・SU薬・グリニド薬との併用で低血糖。",
+     src:[
+      {k:"添付文書",t:"ツイミーグ錠500mg 添付文書 18.1 作用機序（KEGG / JAPIC）",u:"https://www.kegg.jp/medicus-bin/japic_med?japic_code=00069680"},
+      {k:"解説",t:"新薬紹介 イメグリミン塩酸塩錠（北海道大学病院 薬剤部）",u:"https://www.pharm.hokudai.ac.jp/alumni/special/houkou_071-2_2.pdf"}]}
+  ]
+},
+cancer:{
+  intro:"がんは単一の病気ではなく、臓器と遺伝子変化の組み合わせで治療が変わります。図はがん細胞と周囲の免疫・血管を区画に分け、薬剤クラスの作用点を示しています。適応はがん種とバイオマーカーで決まります。",
+  default:"pd1",
+  view:[360,612],
+  organs:[
+    {id:"tcell", label:"T細胞・リンパ節", sub:"免疫", x:10,y:10,w:165,h:114},
+    {id:"vessel", label:"腫瘍血管", sub:"血管新生", x:185,y:10,w:165,h:114},
+    {id:"membrane", label:"細胞膜の受容体", sub:"", x:22,y:162,w:316,h:68, zone:1},
+    {id:"signal", label:"細胞内シグナル", sub:"RAS–MAPK・PI3K–AKT", x:22,y:240,w:316,h:96, zone:1},
+    {id:"cycle", label:"細胞周期・分裂", sub:"G1→S / M期", x:22,y:346,w:316,h:68, zone:1},
+    {id:"dna", label:"核・DNA", sub:"複製と修復", x:22,y:424,w:316,h:170, zone:1}
+  ],
+  extra:'<rect class="cellwall" x="10" y="134" width="340" height="470" rx="26"/><text class="otitle" x="24" y="152">がん細胞</text>'
+    +'<path class="flowd" d="M330 230 L330 240" /><path class="flowd" d="M330 336 L330 346"/><path class="flowd" d="M330 414 L330 424"/>',
+  classes:[
+    {id:"alk", abbr:"アルキル化", name:"アルキル化薬", en:"Alkylating agents", mod:["sm"], ev:"est", ver:"none", sites:["dna"],
+     target:"DNA塩基（主にグアニンN7、テモゾロミドはO6も）",
+     moa:"DNA塩基にアルキル基を共有結合させ、鎖間・鎖内架橋や塩基損傷を作って複製と転写を止める。シクロホスファミドは肝臓のCYPで活性化されるプロドラッグ。テモゾロミドはO6-メチルグアニンを作り、修復酵素MGMTの発現が低い腫瘍で効きやすい。",
+     drugs:[{n:"シクロホスファミド",en:"cyclophosphamide",sm:1},{n:"テモゾロミド",en:"temozolomide",sm:1}],
+     caution:"骨髄抑制。シクロホスファミドの出血性膀胱炎（代謝物アクロレイン。メスナで予防）。",src:[]},
+    {id:"pt", abbr:"白金製剤", name:"白金製剤", en:"Platinum compounds", mod:["sm"], ev:"est", ver:"none", sites:["dna"],
+     target:"DNA（プリン塩基N7への配位結合）",
+     moa:"白金がDNAに配位結合し、主に隣接グアニン間の鎖内架橋を作る。複製が止まり、修復しきれない細胞はアポトーシスに至る。",
+     drugs:[{n:"シスプラチン",en:"cisplatin",sm:1},{n:"カルボプラチン",en:"carboplatin",sm:1},{n:"オキサリプラチン",en:"oxaliplatin",sm:1}],
+     caution:"シスプラチンの腎毒性と強い悪心。オキサリプラチンの寒冷で誘発される末梢神経障害。",src:[]},
+    {id:"anti", abbr:"代謝拮抗", name:"代謝拮抗薬", en:"Antimetabolites", mod:["sm"], ev:"est", ver:"none", sites:["dna"],
+     target:"チミジル酸合成酵素、DHFR、リボヌクレオチド還元酵素 など",
+     moa:"核酸や葉酸に似た構造でDNA合成酵素を阻害する、またはDNAに取り込まれて鎖の伸長を止める。5-FUは活性代謝物FdUMPがチミジル酸合成酵素を阻害し、RNAにも取り込まれる。メトトレキサートはDHFRを阻害。ゲムシタビンはDNAに取り込まれるほか、リボヌクレオチド還元酵素を阻害する。主にS期に作用。",
+     drugs:[{n:"フルオロウラシル（5-FU）",en:"fluorouracil",sm:1},{n:"カペシタビン",en:"capecitabine",sm:1},{n:"ゲムシタビン",en:"gemcitabine",sm:1},{n:"メトトレキサート",en:"methotrexate",sm:1}],
+     caution:"骨髄抑制、口内炎、下痢。5-FU系はDPD欠損で重篤な毒性。",src:[]},
+    {id:"topo", abbr:"トポイソメラーゼ", name:"トポイソメラーゼ阻害薬", en:"Topoisomerase inhibitors", mod:["sm"], ev:"est", ver:"none", sites:["dna"],
+     target:"トポイソメラーゼI（I型） / トポイソメラーゼII（II型）",
+     moa:"トポイソメラーゼがDNAを切断した状態の複合体を安定化して再結合を妨げ、DNA鎖切断を蓄積させる。I型阻害薬はイリノテカン（活性代謝物SN-38）とトポテカン。II型阻害薬はエトポシドと、インターカレーションも起こすアントラサイクリン系（ドキソルビシン）。",
+     drugs:[{n:"イリノテカン",en:"irinotecan",sm:1},{n:"エトポシド",en:"etoposide",sm:1},{n:"ドキソルビシン",en:"doxorubicin",sm:1}],
+     caution:"イリノテカンの下痢と、UGT1A1遺伝子多型による毒性増強。ドキソルビシンの累積用量依存性心毒性。",src:[]},
+    {id:"parp", abbr:"PARP阻害", name:"PARP阻害薬", en:"PARP inhibitors", mod:["sm"], ev:"est", ver:"none", sites:["dna"],
+     target:"PARP1 / PARP2",
+     moa:"PARPの触媒活性を阻害し、PARPをDNA上に捕捉（トラッピング）する。一本鎖切断が修復されず、複製時に二本鎖切断になる。BRCA1/2変異などで相同組換え修復が欠損した細胞はこれを修復できず死滅する（合成致死）。",
+     drugs:[{n:"オラパリブ",en:"olaparib",sm:1},{n:"ニラパリブ",en:"niraparib",sm:1}],
+     caution:"貧血などの骨髄抑制。骨髄異形成症候群・急性骨髄性白血病。",src:[]},
+    {id:"egfr", abbr:"EGFR-TKI", name:"EGFRチロシンキナーゼ阻害薬", en:"EGFR tyrosine kinase inhibitors", mod:["sm"], ev:"est", ver:"none", sites:["membrane"],
+     target:"EGFR チロシンキナーゼドメイン（ATP結合部位）",
+     moa:"EGFRのATP結合部位に結合して自己リン酸化を止め、下流のRAS–MAPK・PI3K–AKTシグナルを遮断する。EGFR活性化変異（exon19欠失、L858R）陽性の非小細胞肺がんで効果が高い。オシメルチニブはC797に共有結合する第3世代で、耐性変異T790Mにも効く。",
+     drugs:[{n:"オシメルチニブ",en:"osimertinib",sm:1},{n:"ゲフィチニブ",en:"gefitinib",sm:1},{n:"エルロチニブ",en:"erlotinib",sm:1}],
+     caution:"皮疹・爪囲炎、下痢、間質性肺疾患。",src:[]},
+    {id:"her2", abbr:"抗HER2抗体", name:"抗HER2抗体", en:"Anti-HER2 antibodies", mod:["ab"], ev:"est", ver:"none", sites:["membrane"],
+     target:"HER2 細胞外ドメイン（IV / II）",
+     moa:"トラスツズマブはHER2細胞外ドメインIVに結合し、シグナルを抑えるとともにADCC（抗体依存性細胞傷害）を誘導する。ペルツズマブはドメインIIに結合し、HER2が他のHERファミリーと二量体を作るのを妨げる。HER2陽性の乳がん・胃がんなどが対象。",
+     drugs:[{n:"トラスツズマブ",en:"trastuzumab"},{n:"ペルツズマブ",en:"pertuzumab"}],
+     caution:"左室駆出率の低下（心機能のモニタリング）。インフュージョンリアクション。",src:[]},
+    {id:"adc", abbr:"ADC", name:"抗体薬物複合体（ADC）", en:"Antibody–drug conjugates", mod:["adc"], ev:"est", ver:"none", sites:["membrane","dna","cycle"],
+     target:"がん細胞表面抗原（抗体部分）＋ ペイロードの標的",
+     moa:"抗体が細胞表面の抗原に結合して細胞内に取り込まれ、リソソームでリンカーが切れて細胞傷害性のペイロードが放出される。トラスツズマブ デルクステカンはHER2抗体にトポイソメラーゼI阻害薬（DXd）を結合し、膜透過性のDXdが隣接細胞にも作用する（バイスタンダー効果）。エンホルツマブ ベドチンはNectin-4抗体に微小管阻害薬MMAEを結合。",
+     drugs:[{n:"トラスツズマブ デルクステカン",en:"trastuzumab deruxtecan"},{n:"エンホルツマブ ベドチン",en:"enfortumab vedotin"}],
+     caution:"トラスツズマブ デルクステカンの間質性肺疾患。ペイロード由来の骨髄抑制・末梢神経障害・皮膚障害。",src:[]},
+    {id:"kras", abbr:"KRAS G12C", name:"KRAS G12C阻害薬", en:"KRAS G12C inhibitors", mod:["sm"], ev:"est", ver:"none", sites:["signal"],
+     target:"変異KRASの Cys12（GDP結合型、スイッチIIポケット）",
+     moa:"G12C変異で生じたシステインに、GDP結合型（不活性型）KRASのスイッチIIポケットで共有結合し、KRASを不活性型に固定する。KRAS G12C変異陽性の非小細胞肺がんなどが対象。",
+     drugs:[{n:"ソトラシブ",en:"sotorasib",sm:1},{n:"アダグラシブ",en:"adagrasib",sm:1}],
+     caution:"下痢、肝機能障害。",src:[]},
+    {id:"braf", abbr:"BRAF/MEK", name:"BRAF阻害薬＋MEK阻害薬", en:"BRAF and MEK inhibitors", mod:["sm"], ev:"est", ver:"none", sites:["signal"],
+     target:"BRAF V600変異キナーゼ / MEK1・2（アロステリック部位）",
+     moa:"BRAF V600変異で恒常的に活性化したMAPK経路を、BRAF阻害薬と下流のMEK阻害薬で二段階に遮断する。BRAF阻害薬単剤ではBRAF野生型細胞でMAPK経路の逆説的活性化や早期耐性が起きるため、併用が標準。悪性黒色腫などが対象。",
+     drugs:[{n:"ダブラフェニブ＋トラメチニブ",en:"dabrafenib",sm:1},{n:"エンコラフェニブ＋ビニメチニブ",en:"encorafenib",sm:1}],
+     caution:"発熱（ダブラフェニブ＋トラメチニブ）。皮膚障害、眼障害、心機能低下。",src:[]},
+    {id:"pi3k", abbr:"PI3K/mTOR", name:"PI3K/mTOR経路阻害薬", en:"PI3K and mTOR inhibitors", mod:["sm"], ev:"est", ver:"none", sites:["signal"],
+     target:"PI3Kα（p110α） / mTORC1",
+     moa:"アルペリシブはPI3Kαを選択的に阻害し、PIK3CA変異陽性のHR陽性乳がんで使われる。エベロリムスは細胞内でFKBP12と複合体を作り、mTORC1をアロステリックに阻害する。",
+     drugs:[{n:"アルペリシブ",en:"alpelisib",sm:1},{n:"エベロリムス",en:"everolimus",sm:1}],
+     caution:"高血糖（PI3Kαはインスリンシグナルの一部のため。糖尿病タブのインスリン製剤を参照）。口内炎、間質性肺疾患（エベロリムス）。",src:[]},
+    {id:"bcrabl", abbr:"BCR-ABL", name:"BCR-ABL阻害薬", en:"BCR-ABL inhibitors", mod:["sm"], ev:"est", ver:"none", sites:["signal"],
+     target:"BCR-ABL融合キナーゼ（ATP部位 / ミリストイルポケット）",
+     moa:"フィラデルフィア染色体から生じる恒常的に活性化したBCR-ABLキナーゼを阻害する。イマチニブはABLキナーゼの不活性型構造のATP部位に結合する。アシミニブはミリストイルポケットに結合するアロステリック阻害薬。慢性骨髄性白血病が代表的な対象。",
+     drugs:[{n:"イマチニブ",en:"imatinib",sm:1},{n:"ダサチニブ",en:"dasatinib",sm:1},{n:"アシミニブ",en:"asciminib",sm:1}],
+     caution:"浮腫・体液貯留、骨髄抑制。ダサチニブの胸水。",src:[]},
+    {id:"cdk", abbr:"CDK4/6", name:"CDK4/6阻害薬", en:"CDK4/6 inhibitors", mod:["sm"], ev:"est", ver:"none", sites:["cycle"],
+     target:"サイクリンD–CDK4/6 複合体",
+     moa:"CDK4/6によるRbタンパク質のリン酸化を阻害し、転写因子E2Fの放出を抑えて細胞周期をG1期で止める。HR陽性HER2陰性乳がんで内分泌療法と併用する。",
+     drugs:[{n:"パルボシクリブ",en:"palbociclib",sm:1},{n:"アベマシクリブ",en:"abemaciclib",sm:1}],
+     caution:"好中球減少（パルボシクリブ）。下痢（アベマシクリブ）。",src:[]},
+    {id:"mt", abbr:"微小管阻害", name:"微小管阻害薬", en:"Microtubule-targeting agents", mod:["sm"], ev:"est", ver:"none", sites:["cycle"],
+     target:"β-チューブリン",
+     moa:"紡錘体の微小管の動態を止めてM期で分裂を停止させる。タキサン系（パクリタキセル、ドセタキセル）は微小管を安定化して脱重合を妨げ、ビンカアルカロイド（ビンクリスチン）とエリブリンは重合・伸長を妨げる。",
+     drugs:[{n:"パクリタキセル",en:"paclitaxel",sm:1},{n:"ドセタキセル",en:"docetaxel",sm:1},{n:"ビンクリスチン",en:"vincristine",sm:1}],
+     caution:"末梢神経障害、骨髄抑制、パクリタキセルの過敏反応。",src:[]},
+    {id:"vegf", abbr:"血管新生阻害", name:"血管新生阻害薬", en:"Anti-angiogenic agents", mod:["ab","sm"], ev:"est", ver:"none", sites:["vessel"],
+     target:"VEGF-A / VEGFR2 / VEGFR1–3（マルチキナーゼ）",
+     moa:"腫瘍が出すVEGFによる血管新生を遮断し、腫瘍への血流と栄養供給を減らす。異常な腫瘍血管を正常化して併用薬の到達を改善する作用も提唱されている。ベバシズマブはVEGF-Aを中和し、ラムシルマブはVEGFR2に結合する。レンバチニブなどはVEGFRを含む複数のキナーゼを阻害する低分子。",
+     drugs:[{n:"ベバシズマブ",en:"bevacizumab"},{n:"ラムシルマブ",en:"ramucirumab"},{n:"レンバチニブ",en:"lenvatinib",sm:1}],
+     caution:"高血圧、蛋白尿、出血、消化管穿孔、創傷治癒遅延。",src:[]},
+    {id:"pd1", abbr:"PD-1/PD-L1", name:"PD-1 / PD-L1阻害抗体", en:"PD-1 / PD-L1 inhibitors", mod:["ab"], ev:"est", ver:"none", sites:["tcell"],
+     target:"T細胞のPD-1 / がん細胞・免疫細胞のPD-L1",
+     moa:"T細胞上のPD-1と、がん細胞などに発現するPD-L1の結合を遮断し、疲弊したエフェクターT細胞への抑制シグナルを解除する。薬剤自体はがん細胞を攻撃せず、T細胞による攻撃を回復させる。",
+     drugs:[{n:"ニボルマブ（抗PD-1）",en:"nivolumab"},{n:"ペムブロリズマブ（抗PD-1）",en:"pembrolizumab"},{n:"アテゾリズマブ（抗PD-L1）",en:"atezolizumab"}],
+     caution:"免疫関連有害事象：間質性肺疾患、大腸炎、甲状腺機能障害、劇症型を含む1型糖尿病（糖尿病タブ参照）など。",src:[]},
+    {id:"ctla4", abbr:"CTLA-4", name:"CTLA-4阻害抗体", en:"CTLA-4 inhibitors", mod:["ab"], ev:"est", ver:"none", sites:["tcell"],
+     target:"T細胞のCTLA-4",
+     moa:"CTLA-4は共刺激受容体CD28と競合して抗原提示細胞のB7（CD80/CD86）に結合し、T細胞の初期活性化（プライミング）を抑える。抗CTLA-4抗体はこれを遮断し、主にリンパ節でのT細胞活性化を高める。腫瘍内の制御性T細胞を除去する作用も提唱されているが、ヒトでの寄与は議論が続いている。",
+     drugs:[{n:"イピリムマブ",en:"ipilimumab"},{n:"トレメリムマブ",en:"tremelimumab"}],
+     caution:"免疫関連有害事象（抗PD-1抗体より頻度が高い傾向。特に大腸炎、下垂体炎）。",src:[]},
+    {id:"cart", abbr:"CAR-T", name:"CAR-T細胞療法", en:"CAR T-cell therapy", mod:["cell"], ev:"est", ver:"none", sites:["tcell"],
+     target:"CD19 / BCMA などの表面抗原",
+     moa:"患者のT細胞を採取し、抗原認識部位（scFv）・CD3ζ・共刺激ドメイン（CD28または4-1BB）からなるキメラ抗原受容体の遺伝子を導入して体内に戻す。MHCに依存せず、標的抗原を発現する細胞を認識して傷害する。",
+     drugs:[{n:"チサゲンレクルユーセル（CD19）",en:"tisagenlecleucel"},{n:"アキシカブタゲン シロルユーセル（CD19）",en:"axicabtagene ciloleucel"},{n:"イデカブタゲン ビクルユーセル（BCMA）",en:"idecabtagene vicleucel"}],
+     caution:"サイトカイン放出症候群、免疫エフェクター細胞関連神経毒性症候群（ICANS）、B細胞減少。",src:[]},
+    {id:"bite", abbr:"二重特異性", name:"二重特異性T細胞誘導抗体", en:"Bispecific T-cell engagers", mod:["ab"], ev:"est", ver:"none", sites:["tcell"],
+     target:"T細胞のCD3 × がん抗原（CD19、BCMA、CD20 など）",
+     moa:"一方の結合部位でT細胞のCD3、もう一方でがん細胞の表面抗原に結合し、両者を架橋する。MHCに依存せずにT細胞を活性化して、がん細胞を傷害させる。",
+     drugs:[{n:"ブリナツモマブ（CD19×CD3）",en:"blinatumomab"},{n:"テクリスタマブ（BCMA×CD3）",en:"teclistamab"},{n:"エプコリタマブ（CD20×CD3）",en:"epcoritamab"}],
+     caution:"サイトカイン放出症候群、ICANS、感染症。",src:[]}
+  ]
+}};
+
+// ---------- added diseases, levels, statistics ----------
+Object.assign(MOD,{fus:"Fc融合",prot:"タンパク質",na:"核酸",gene:"遺伝子治療",vac:"ワクチン"});
+const DISEASE_ORDER=["diabetes","cancer","ra","lipid","ad","sma","hemo","allergy","virus"];
+const DNAME={diabetes:"糖尿病",cancer:"がん",ra:"関節リウマチ",lipid:"脂質異常症",ad:"アルツハイマー病",sma:"脊髄性筋萎縮症",hemo:"血友病",allergy:"喘息・アトピー",virus:"ウイルス感染症"};
+
+function dz(o){o.auto=true;return o;}
+DATA.ra=dz({default:"tnf",
+ zones:[{id:"lymph",label:"リンパ節・T細胞",sub:"共刺激"},{id:"syn",label:"滑膜",sub:"マクロファージ・サイトカイン"},{id:"cell",label:"細胞内シグナル",sub:"JAK–STAT"},{id:"bone",label:"骨",sub:"破骨細胞"}],
+ classes:[
+ {id:"mtx",abbr:"MTX",name:"メトトレキサート",en:"Methotrexate",mod:["sm"],ev:"deb",ver:"none",sites:["syn"],step:2,act:"炎症を抑える",
+  target:"葉酸代謝の酵素（DHFR、ATIC など）",
+  moa:"抗がん薬としては高用量でDHFRを阻害するが、関節リウマチでは週1回の低用量で使う。低用量での主な機序として、ATIC阻害によるAICAR蓄積→細胞外アデノシン増加→A2A受容体を介した抗炎症作用が提唱されているが、確定していない。日本では関節リウマチ治療の第一選択薬（アンカードラッグ）。",
+  drugs:[{n:"メトトレキサート",en:"methotrexate",sm:1}],
+  caution:"間質性肺炎、骨髄抑制、肝障害。副作用予防に葉酸を併用する。週1回の服用を連日と取り違えると重い中毒になる。",src:[],
+  l1:"免疫細胞が増えすぎて炎症が続くのを抑える飲み薬。関節リウマチの治療の中心で、週に1回だけ飲む。",
+  l2:"もとは抗がん薬で、細胞が増えるのに必要な葉酸の代謝を邪魔する。少ない量を週1回使うと、炎症を抑える作用が中心になる。",
+  l4:"低用量では細胞内でポリグルタミン酸化されて長く留まる。アデノシン説のほか、JAK–STAT経路の抑制や活性酸素の関与も報告されている。"},
+ {id:"tnf",abbr:"TNF阻害",name:"TNF阻害薬",en:"TNF inhibitors",mod:["ab","fus"],ev:"est",ver:"none",sites:["syn"],step:2,act:"TNFをふさぐ",
+  target:"TNF-α",
+  moa:"炎症の中心的なサイトカインであるTNF-αに結合し、TNF受容体への結合を防ぐ。滑膜の炎症、他のサイトカインの産生、破骨細胞の活性化がまとめて抑えられる。抗体（インフリキシマブ、アダリムマブ、ゴリムマブ）、Fc融合タンパク質（エタネルセプト）、PEG化Fab'（セルトリズマブ ペゴル）と複数のモダリティがある。",
+  drugs:[{n:"インフリキシマブ",en:"infliximab"},{n:"アダリムマブ",en:"adalimumab"},{n:"エタネルセプト",en:"etanercept"},{n:"セルトリズマブ ペゴル",en:"certolizumab pegol"}],
+  caution:"結核などの感染症（投与前に結核を検査する）、B型肝炎の再活性化、インフュージョンリアクション。",src:[],
+  l1:"炎症を起こすタンパク質（TNF）にくっついて、働かないようにする注射薬。",
+  l2:"TNFは炎症を広げる中心的なサイトカイン。抗体などでTNFを捕まえると、関節の腫れと骨の破壊が進みにくくなる。感染症にはかかりやすくなる。",
+  l4:"インフリキシマブはキメラ抗体で抗薬物抗体ができやすく、日本ではメトトレキサートとの併用が必須。膜型TNFへの結合やFc機能の違いから、薬剤間で効く病気が異なる（エタネルセプトはクローン病に無効）。"},
+ {id:"il6",abbr:"IL-6R抗体",name:"IL-6受容体抗体",en:"IL-6 receptor antibodies",mod:["ab"],ev:"est",ver:"none",sites:["syn"],step:2,act:"IL-6の信号をふさぐ",
+  target:"IL-6受容体（膜型・可溶型）",
+  moa:"IL-6受容体に結合し、IL-6が受容体に結合するのを防ぐ。IL-6は膜型受容体を介する経路と、可溶型受容体と複合体を作ってgp130をもつ多くの細胞に作用する経路（トランスシグナリング）の両方で働き、どちらも遮断される。トシリズマブは日本で開発された。",
+  drugs:[{n:"トシリズマブ",en:"tocilizumab"},{n:"サリルマブ",en:"sarilumab"}],
+  caution:"感染症。CRPの上昇や発熱が起こりにくくなり、感染症に気づくのが遅れることがある。脂質の上昇。",src:[],
+  l1:"炎症を起こすタンパク質IL-6の受け取り口をふさぐ注射薬。日本で開発された。",
+  l2:"IL-6は炎症や発熱、CRPの上昇を起こすサイトカイン。その受容体に抗体が結合すると、IL-6の信号が細胞に伝わらなくなる。",
+  l4:"トシリズマブはヒト化IgG1。サトラリズマブ（視神経脊髄炎スペクトラム障害）は、pH依存的な抗原結合とFcRn結合の改変で血中に長く残るよう設計された抗IL-6受容体抗体。"},
+ {id:"abat",abbr:"アバタセプト",name:"T細胞共刺激阻害薬（アバタセプト）",en:"Abatacept (CTLA-4–Ig)",mod:["fus"],ev:"est",ver:"none",sites:["lymph"],step:1,act:"T細胞の活性化を止める",
+  target:"CD80 / CD86（抗原提示細胞）",
+  moa:"CTLA-4の細胞外ドメインをIgG1のFcにつないだ融合タンパク質。抗原提示細胞のCD80/CD86に結合し、T細胞のCD28への共刺激を遮断して、T細胞の活性化を抑える。",
+  drugs:[{n:"アバタセプト",en:"abatacept"}],caution:"感染症。COPD患者で呼吸器の有害事象が多い。",src:[],
+  l1:"T細胞（免疫反応を始める細胞）が働き始めるのを止める注射薬。",
+  l2:"T細胞が働き始めるには、抗原の認識に加えてCD28という分子への刺激が必要。アバタセプトはこの刺激をふさいで、自己免疫反応の始まりを抑える。",
+  l4:"Fc部分はヒンジのシステインをセリンに置換し、エフェクター機能を弱めている。がんで使う抗CTLA-4抗体とは逆に、CTLA-4の作用を再現する方向の薬。"},
+ {id:"jak",abbr:"JAK阻害",name:"JAK阻害薬",en:"JAK inhibitors",mod:["sm"],ev:"est",ver:"none",sites:["cell"],step:3,act:"細胞内の信号を止める",
+  target:"JAK1 / JAK2 / JAK3 / TYK2",
+  moa:"多くのサイトカイン受容体は、細胞内でJAKというキナーゼを使ってSTATをリン酸化し、炎症遺伝子の転写を起こす。JAK阻害薬はJAKのATP結合部位に結合し、複数のサイトカインの信号をまとめて止める。経口薬。",
+  drugs:[{n:"トファシチニブ",en:"tofacitinib",sm:1},{n:"バリシチニブ",en:"baricitinib",sm:1},{n:"ウパダシチニブ",en:"upadacitinib",sm:1},{n:"ペフィシチニブ",en:"peficitinib",sm:1}],
+  caution:"帯状疱疹、重い感染症、静脈血栓塞栓症。高齢・心血管リスクのある患者では、心血管イベントと悪性腫瘍の増加が報告されている。",src:[],
+  l1:"細胞の中で炎症の信号を伝える酵素（JAK）を止める飲み薬。",
+  l2:"サイトカインが受容体に結合すると、細胞の中ではJAKという酵素が信号を伝える。JAKを止めると、いくつものサイトカインの作用を同時に抑えられる。",
+  l4:"受容体ごとに使うJAKの組み合わせが違い（例：IL-6はJAK1/JAK2/TYK2、γc系サイトカインはJAK1/JAK3）、薬剤のJAK選択性で効果と副作用が変わる。ペフィシチニブは日本で開発された。"},
+ {id:"rankl",abbr:"抗RANKL",name:"抗RANKL抗体（デノスマブ）",en:"Anti-RANKL antibody",mod:["ab"],ev:"est",ver:"none",sites:["bone"],step:4,act:"骨の破壊を抑える",
+  target:"RANKL",
+  moa:"破骨細胞の分化と活性化に必要なRANKLに結合し、受容体RANKへの結合を防ぐ。炎症そのものは抑えないが、関節の骨びらんの進行を抑える。",
+  drugs:[{n:"デノスマブ",en:"denosumab"}],
+  caution:"低カルシウム血症、顎骨壊死。中止後の急な骨量低下（多発椎体骨折）。",src:[],
+  l1:"骨を壊す細胞（破骨細胞）を働かせなくして、骨の破壊を防ぐ注射薬。",
+  l2:"破骨細胞はRANKLという信号を受けて増え、骨を溶かす。抗体でRANKLをふさぐと、骨の破壊が止まる。",
+  l4:"RANKL–RANK–OPG系はTNFスーパーファミリーに属する。デノスマブは完全ヒトIgG2。中止後のリバウンド骨折を避けるため、ビスホスホネートなどへの切り替えが勧められる。"}
+ ]});
+
+DATA.lipid=dz({default:"pcsk9ab",
+ zones:[{id:"gut",label:"小腸",sub:"コレステロール吸収"},{id:"liver",label:"肝細胞",sub:"合成・LDL回収"},{id:"blood",label:"血液",sub:"LDL・PCSK9"},{id:"nuc",label:"核内受容体",sub:"中性脂肪の代謝"}],
+ classes:[
+ {id:"statin",abbr:"スタチン",name:"HMG-CoA還元酵素阻害薬（スタチン）",en:"Statins",mod:["sm"],ev:"est",ver:"none",sites:["liver"],step:0,act:"コレステロール合成を止める",
+  target:"HMG-CoA還元酵素",
+  moa:"コレステロール合成の律速酵素であるHMG-CoA還元酵素を阻害する。肝細胞内のコレステロールが減るとSREBP2が活性化してLDL受容体の発現が増え、血中のLDLがより多く取り込まれる。",
+  drugs:[{n:"アトルバスタチン",en:"atorvastatin",sm:1},{n:"ロスバスタチン",en:"rosuvastatin",sm:1},{n:"ピタバスタチン",en:"pitavastatin",sm:1}],
+  caution:"筋肉痛・横紋筋融解症、肝機能障害。一部はCYP3A4で代謝され、相互作用に注意。",src:[],
+  l1:"肝臓でコレステロールが作られるのを止めて、血液中のLDLを減らす飲み薬。",
+  l2:"コレステロールを作る酵素を止めると、肝臓は足りない分を血液から取り込もうとしてLDL受容体を増やす。その結果、血液中のLDLが下がる。",
+  l4:"スタチンはHMG-CoAに似た部分構造で酵素の活性部位を競合阻害する。最初のスタチンは遠藤章が発見したコンパクチン（メバスタチン）。SREBP2はPCSK9の転写も増やすため、スタチンでPCSK9も上昇する。"},
+ {id:"eze",abbr:"エゼチミブ",name:"小腸コレステロールトランスポーター阻害薬",en:"Ezetimibe",mod:["sm"],ev:"est",ver:"none",sites:["gut"],step:0,act:"腸からの吸収を減らす",
+  target:"NPC1L1",
+  moa:"小腸上皮のNPC1L1に結合し、食事と胆汁に由来するコレステロールの吸収を減らす。肝臓に届くコレステロールが減ると、肝臓のLDL受容体が増える。スタチンと併用するとLDLがさらに下がる。",
+  drugs:[{n:"エゼチミブ",en:"ezetimibe",sm:1}],caution:"副作用は少ない。肝機能障害。",src:[],
+  l1:"腸からコレステロールが吸収されるのを減らす飲み薬。",
+  l2:"小腸の細胞はNPC1L1という輸送体でコレステロールを取り込む。これを止めると吸収が減り、肝臓のLDL受容体が増えてLDLが下がる。",
+  l4:"グルクロン酸抱合体も活性をもち、腸肝循環する。ヒトではNPC1L1は肝臓にも発現する。"},
+ {id:"pcsk9ab",abbr:"抗PCSK9抗体",name:"抗PCSK9抗体",en:"PCSK9 antibodies",mod:["ab"],ev:"est",ver:"none",sites:["blood"],step:2,act:"LDL受容体の分解を防ぐ",
+  target:"PCSK9（血中）",
+  moa:"PCSK9は肝臓から分泌されてLDL受容体に結合し、受容体をLDLと一緒にリソソームで分解させる。抗体が血中のPCSK9に結合すると、LDL受容体が分解されずに細胞表面に戻り、LDLの取り込みが増える。",
+  drugs:[{n:"エボロクマブ",en:"evolocumab"},{n:"アリロクマブ",en:"alirocumab"}],caution:"注射部位反応。",src:[],
+  l1:"LDLを回収する受容体が壊されるのを防ぐ注射薬。",
+  l2:"PCSK9というタンパク質はLDL受容体にくっついて分解させる。抗体でPCSK9を捕まえると受容体が長く使われ、血液中のLDLが大きく下がる。",
+  l4:"PCSK9はLDL受容体のEGF-Aドメインに結合し、エンドソームの酸性条件で結合がさらに強まるため、受容体が細胞表面に戻れなくなる。PCSK9の機能喪失変異をもつ人はLDLが低く冠動脈疾患が少ないという遺伝学的知見が、開発の根拠になった。"},
+ {id:"pcsk9si",abbr:"PCSK9 siRNA",name:"PCSK9 siRNA（インクリシラン）",en:"Inclisiran",mod:["na"],ev:"est",ver:"none",sites:["liver"],step:2,act:"PCSK9を作らせない",
+  target:"PCSK9 mRNA（肝細胞）",
+  moa:"GalNAcを結合したsiRNAで、肝細胞に取り込まれてPCSK9のmRNAを分解する。PCSK9の産生が減り、LDL受容体が増える。初回、3か月後、その後6か月ごとに皮下注射する。",
+  drugs:[{n:"インクリシラン",en:"inclisiran"}],caution:"注射部位反応。",src:[],
+  l1:"肝臓でPCSK9が作られないようにする注射薬。年2回の注射で効く。",
+  l2:"PCSK9の設計図（mRNA）を壊すRNAの薬。肝臓に届くように糖（GalNAc）をつけてある。",
+  l4:"同じ標的を、抗体（できたタンパク質を中和）とsiRNA（タンパク質の産生を抑制）の2つのモダリティで狙う例。RISCに取り込まれたガイド鎖が長く働くため、投与間隔を長くできる。"},
+ {id:"fib",abbr:"ペマフィブラート",name:"選択的PPARαモジュレーター",en:"SPPARMα (pemafibrate)",mod:["sm"],ev:"est",ver:"none",sites:["nuc"],step:1,act:"中性脂肪を下げる",
+  target:"PPARα",
+  moa:"核内受容体PPARαを活性化し、脂肪酸のβ酸化とリポタンパクリパーゼ（LPL）の働きを高め、アポC-IIIを減らす。主に中性脂肪を下げ、HDLコレステロールを上げる。日本で開発された。",
+  drugs:[{n:"ペマフィブラート",en:"pemafibrate",sm:1}],caution:"胆石、横紋筋融解症（腎機能障害時、スタチン併用時に注意）。",src:[],
+  l1:"血液中の中性脂肪を下げる飲み薬。日本で開発された。",
+  l2:"PPARαという遺伝子のスイッチを入れて、肝臓で脂肪酸を分解する働きと、血液中の中性脂肪を分解する酵素の働きを強める。",
+  l4:"従来のフィブラートよりPPARαへの選択性と活性が高い。大規模試験（PROMINENT）では心血管イベントの減少は示されなかった。"}
+ ]});
+
+DATA.ad=dz({default:"abeta",
+ zones:[{id:"ext",label:"細胞外",sub:"アミロイドβ"},{id:"syn",label:"シナプス",sub:"神経伝達"},{id:"neuron",label:"神経細胞内",sub:"タウ"}],
+ classes:[
+ {id:"abeta",abbr:"抗Aβ抗体",name:"抗アミロイドβ抗体",en:"Anti-amyloid beta antibodies",mod:["ab"],ev:"est",ver:"none",sites:["ext"],step:0,act:"アミロイドβを取り除く",
+  target:"Aβプロトフィブリル（レカネマブ）／ピログルタミン酸化Aβ（ドナネマブ）",
+  moa:"脳に入った抗体がアミロイドβの凝集体に結合し、ミクログリアがFc受容体を介して取り込んで除去する。軽度認知障害と軽度の認知症で、アミロイドの蓄積が確認された患者が対象。",
+  drugs:[{n:"レカネマブ",en:"lecanemab"},{n:"ドナネマブ",en:"donanemab"}],
+  caution:"ARIA（アミロイド関連画像異常：脳浮腫のARIA-E、微小出血・脳表ヘモジデリン沈着のARIA-H）。APOE ε4のホモ接合体でリスクが高い。定期的なMRIが必要。",src:[],
+  l1:"脳にたまったアミロイドβを取り除く点滴の抗体薬。早い段階の患者さんで、進み方をゆっくりにする。",
+  l2:"抗体がアミロイドβのかたまりに結合すると、脳の免疫細胞（ミクログリア）がそれを取り込んで除去する。病気を治すのではなく、進行を遅らせる薬。",
+  l4:"抗体の脳内への移行は血中濃度の約0.1%程度とされ、高用量の静注が必要。トランスフェリン受容体を介して脳への移行を高める抗体の開発が進んでいる。"},
+ {id:"ache",abbr:"ChE阻害",name:"コリンエステラーゼ阻害薬",en:"Cholinesterase inhibitors",mod:["sm"],ev:"est",ver:"none",sites:["syn"],step:3,act:"アセチルコリンを増やす",
+  target:"アセチルコリンエステラーゼ",
+  moa:"シナプスでアセチルコリンを分解する酵素を阻害し、アセチルコリンの濃度を保つ。認知機能を一時的に改善するが、神経細胞の減少は止めない（対症療法）。",
+  drugs:[{n:"ドネペジル",en:"donepezil",sm:1},{n:"ガランタミン",en:"galantamine",sm:1},{n:"リバスチグミン",en:"rivastigmine",sm:1}],
+  caution:"悪心・嘔吐、下痢、徐脈。",src:[],
+  l1:"記憶に関わる物質（アセチルコリン）が分解されるのを防いで、症状を一時的に軽くする飲み薬。日本で開発されたドネペジルが代表。",
+  l2:"アルツハイマー病ではアセチルコリンを使う神経が減る。分解する酵素を止めると、残ったアセチルコリンが長く働く。病気の進行は止めない。",
+  l4:"ドネペジルはAChE選択的、リバスチグミンはブチリルコリンエステラーゼも阻害し貼付剤がある、ガランタミンはニコチン性受容体のアロステリック増強作用ももつ。"},
+ {id:"nmda",abbr:"メマンチン",name:"NMDA受容体拮抗薬",en:"NMDA receptor antagonist (memantine)",mod:["sm"],ev:"est",ver:"none",sites:["syn"],step:2,act:"過剰な刺激を弱める",
+  target:"NMDA型グルタミン酸受容体",
+  moa:"NMDA受容体のチャネル内に結合する非競合的拮抗薬。持続的な過剰刺激による神経障害を抑え、記憶に必要な一時的な強い刺激では外れやすいとされる。中等度から高度の患者で使う。",
+  drugs:[{n:"メマンチン",en:"memantine",sm:1}],caution:"めまい、便秘、傾眠。",src:[],
+  l1:"神経が刺激されすぎて傷むのを防ぐ飲み薬。",
+  l2:"グルタミン酸は神経を興奮させる物質。受容体が刺激され続けると神経細胞が傷む。メマンチンは受容体の通り道を部分的にふさいで、過剰な刺激を弱める。",
+  l4:"Mg²⁺と同じように電圧依存的にチャネルを遮断する。解離が速く親和性が中程度であることが、副作用の少なさの理由とされる。"}
+ ]});
+
+DATA.sma=dz({default:"nus",
+ zones:[{id:"gene",label:"遺伝子",sub:"SMN1・SMN2"},{id:"rna",label:"mRNA前駆体",sub:"スプライシング"},{id:"neuron",label:"運動ニューロン",sub:"SMNタンパク質"}],
+ classes:[
+ {id:"nus",abbr:"ヌシネルセン",name:"アンチセンス核酸（ヌシネルセン）",en:"Nusinersen",mod:["na"],ev:"est",ver:"none",sites:["rna"],step:1,act:"SMN2から完全なSMNを作らせる",
+  target:"SMN2 mRNA前駆体のイントロン7（ISS-N1）",
+  moa:"SMN2のmRNA前駆体のイントロン7にあるスプライシング抑制配列（ISS-N1）に結合し、抑制因子の結合を妨げる。エクソン7を含む完全長のmRNAが増え、機能をもつSMNタンパク質が増える。髄腔内に投与する。",
+  drugs:[{n:"ヌシネルセン",en:"nusinersen"}],caution:"腰椎穿刺に伴う頭痛・背部痛。血小板減少と腎毒性（尿タンパク）を確認する。",src:[],
+  l1:"SMN2遺伝子から完全なSMNタンパク質が作られるようにする核酸の薬。背骨のすき間から、脊髄の周りの液に注射する。",
+  l2:"SMN2のRNAの、エクソン7を抜けさせる部分に結合してふさぐ。エクソン7が残った正しいRNAができ、SMNが増える。",
+  l4:"2'-MOE修飾・全ホスホロチオエートの18塩基で、RNase Hを呼ばない立体阻害型。hnRNP A1/A2の結合を妨げる。髄液中に長く留まるため、維持期は4か月ごとに投与する。"},
+ {id:"ris",abbr:"リスジプラム",name:"SMN2スプライシング修飾薬（リスジプラム）",en:"Risdiplam",mod:["sm"],ev:"est",ver:"none",sites:["rna"],step:1,act:"完全なSMNを作らせる（飲み薬）",
+  target:"SMN2 mRNA前駆体（エクソン7の5'スプライス部位とU1 snRNP）",
+  moa:"SMN2のmRNA前駆体とスプライシング装置（U1 snRNP）の結合を安定化し、エクソン7を含む完全長mRNAを増やす。経口投与で全身に分布する。",
+  drugs:[{n:"リスジプラム",en:"risdiplam",sm:1}],caution:"下痢、発疹、発熱。動物で生殖への影響が報告されている。",src:[],
+  l1:"毎日飲む薬で、SMN2から完全なSMNタンパク質を作らせる。",
+  l2:"RNAに結合する低分子の薬。スプライシングを調節して、エクソン7を残した正しいRNAを増やす。",
+  l4:"RNAを標的とする低分子医薬の承認例。5'スプライス部位に加え、エクソン7内のESE2配列にも結合すると報告されている。"},
+ {id:"ona",abbr:"AAV遺伝子治療",name:"遺伝子補充療法（オナセムノゲン アベパルボベク）",en:"Onasemnogene abeparvovec",mod:["gene"],ev:"est",ver:"none",sites:["gene","neuron"],step:0,act:"SMN1遺伝子を補う",
+  target:"運動ニューロンなど（SMN1 cDNAを導入）",
+  moa:"AAV9ベクターでヒトSMN1のcDNAを運動ニューロンなどに届け、SMNタンパク質を作らせる。1回の静脈内投与。2歳未満の患者が対象。",
+  drugs:[{n:"オナセムノゲン アベパルボベク",en:"onasemnogene abeparvovec"}],
+  caution:"肝機能障害（投与前後に副腎皮質ステロイドを使う）、血小板減少、血栓性微小血管症。AAV9に対する抗体が高いと使えない。",src:[],
+  l1:"働かないSMN1遺伝子のかわりに、正常な遺伝子をウイルスの殻に入れて体に届ける、1回だけの点滴。",
+  l2:"病気を起こさないウイルス（AAV9）の殻に正しいSMN1遺伝子を入れて投与する。運動ニューロンの中でSMNタンパク質が作られ続ける。",
+  l4:"自己相補型AAV（scAAV）で二本鎖化の段階を省き、発現を速めている。"}
+ ]});
+
+DATA.hemo=dz({default:"emi",
+ zones:[{id:"plasma",label:"血液中の凝固因子",sub:"テナーゼ複合体"},{id:"bal",label:"凝固を抑える仕組み",sub:"TFPI・アンチトロンビン"},{id:"liver",label:"肝臓",sub:"凝固因子の産生"}],
+ classes:[
+ {id:"fac",abbr:"凝固因子製剤",name:"凝固因子補充療法",en:"Coagulation factor replacement",mod:["prot","fus"],ev:"est",ver:"none",sites:["plasma"],step:2,act:"足りない因子を補う",
+  target:"第VIII因子／第IX因子（補充）",
+  moa:"遺伝子組換えで作った第VIII因子または第IX因子を静脈注射で補う。出血したときの治療と、定期的に投与して出血を防ぐ定期補充療法がある。Fc融合やPEG化、アルブミン融合で半減期を延ばした製剤もある。",
+  drugs:[{n:"エフモロクトコグ アルファ（第VIII因子–Fc）",en:"efmoroctocog alfa"},{n:"エフトレノナコグ アルファ（第IX因子–Fc）",en:"eftrenonacog alfa"}],
+  caution:"インヒビター（中和抗体）の発生。",src:[],
+  l1:"足りない凝固因子を、薬として静脈に注射して補う。",
+  l2:"遺伝子組換えで作った第VIII因子や第IX因子を補う。血液中から早く消えるので、週に何回か注射する。Fcをつないで長持ちさせた製剤もある。",
+  l4:"第VIII因子はVWFと結合して循環するため、VWFの半減期が延長の上限になる。エフアネソクトコグ アルファはVWFのD'D3ドメインとXTENを融合し、この制約を外した。"},
+ {id:"emi",abbr:"エミシズマブ",name:"第VIII因子機能代替二重特異性抗体",en:"Emicizumab",mod:["ab"],ev:"est",ver:"none",sites:["plasma"],step:2,act:"第VIII因子のかわりに橋渡しする",
+  target:"第IXa因子 × 第X因子",
+  moa:"一方の腕で活性化第IX因子、もう一方の腕で第X因子に結合し、両者を近づけて第X因子の活性化を進める。第VIII因子の補因子機能を代替するため、第VIII因子に対するインヒビターがあっても効く。皮下注射で週1回〜4週に1回。日本（中外製薬）で開発された。",
+  drugs:[{n:"エミシズマブ",en:"emicizumab"}],
+  caution:"活性型プロトロンビン複合体製剤（aPCC）との併用で血栓性微小血管症・血栓塞栓症。凝固検査（APTTなど）が見かけ上正常になる。",src:[],
+  l1:"第IX因子と第X因子を同時につかんで近づけ、足りない第VIII因子のかわりをする抗体。皮下注射で効果が長く続く。",
+  l2:"第VIII因子の役割は、第IX因子と第X因子を近づけて反応を進めること。二重特異性抗体がこの橋渡しを代わりに行う。第VIII因子そのものではないので、インヒビターの影響を受けない。",
+  l4:"共通軽鎖と、CH3界面などの改変による異なる重鎖の正しい会合で、二重特異性IgGとして効率よく製造できるようにしている。"},
+ {id:"rebal",abbr:"リバランス",name:"凝固を抑える因子を減らす薬（リバランス療法）",en:"Rebalancing agents",mod:["ab","na"],ev:"est",ver:"none",sites:["bal"],step:3,act:"抑える因子を弱めてトロンビンを増やす",
+  target:"TFPI（抗体）／アンチトロンビン mRNA（siRNA）",
+  moa:"血液には凝固を抑える因子（TFPI、アンチトロンビンなど）がある。これらを抑えると、凝固因子が足りなくても十分なトロンビンが作られる。抗TFPI抗体（コンシズマブ、マルスタシマブ）と、アンチトロンビンを減らすsiRNA（フィツシラン）がある。",
+  drugs:[{n:"コンシズマブ",en:"concizumab"},{n:"マルスタシマブ",en:"marstacimab"},{n:"フィツシラン",en:"fitusiran"}],
+  caution:"血栓症。承認状況と適応は国・薬剤によって異なるため、最新情報で確認が必要。",src:[],
+  l1:"血が固まるのを抑えるタンパク質を減らしたり働かなくしたりして、固まる力と抑える力の釣り合いを取り直す薬。",
+  l2:"凝固を進める力が弱い血友病では、凝固を抑える力も弱めれば釣り合いが戻る。TFPIを抗体でふさぐ方法と、肝臓でアンチトロンビンを作らせないsiRNAの方法がある。",
+  l4:"TFPIはKunitzドメイン2で第Xa因子を、ドメイン1で組織因子–第VIIa因子複合体を阻害する。コンシズマブはKunitzドメイン2に結合する。"},
+ {id:"gt",abbr:"遺伝子治療",name:"AAV遺伝子治療",en:"AAV gene therapy for hemophilia",mod:["gene"],ev:"est",ver:"none",sites:["liver"],step:2,act:"肝臓で因子を作らせる",
+  target:"肝細胞（F8またはF9遺伝子を導入）",
+  moa:"AAVベクターで肝細胞に第VIII因子または第IX因子の遺伝子を届け、体内で因子を作らせる。1回の点滴で、定期補充療法が不要になる患者がいる。",
+  drugs:[{n:"エトラナコゲン デザパルボベク（第IX因子）",en:"etranacogene dezaparvovec"},{n:"バロクトコゲン ロキサパルボベク（第VIII因子）",en:"valoctocogene roxaparvovec"}],
+  caution:"肝酵素の上昇（ステロイドで対応）。AAVに対する中和抗体があると使えない。第VIII因子では発現量が年々低下する例がある。",src:[],
+  l1:"肝臓に凝固因子の遺伝子を届けて、自分の体で凝固因子を作れるようにする1回の治療。",
+  l2:"病気を起こさないウイルス（AAV）の殻に凝固因子の遺伝子を入れて点滴する。凝固因子はもともと肝臓で作られるので、肝細胞に遺伝子を届ける。",
+  l4:"第IX因子の遺伝子治療では、活性が約8倍高いPadua変異（R338L）を使い、少ない発現量で効果を得ている。第VIII因子はBドメインを除いた配列（BDD-FVIII）でAAVの搭載量に収めている。"}
+ ]});
+
+DATA.allergy=dz({default:"il4r",
+ zones:[{id:"epi",label:"上皮（皮膚・気道）",sub:"TSLP・IL-33"},{id:"imm",label:"免疫細胞",sub:"Th2・ILC2・B細胞"},{id:"eff",label:"エフェクター細胞",sub:"好酸球・マスト細胞"},{id:"tissue",label:"気道・皮膚の組織",sub:"平滑筋・感覚神経"}],
+ classes:[
+ {id:"ics",abbr:"ステロイド",name:"副腎皮質ステロイド（吸入・外用）",en:"Corticosteroids (inhaled / topical)",mod:["sm"],ev:"est",ver:"none",sites:["imm","tissue"],step:2,act:"炎症全体を抑える",
+  target:"グルココルチコイド受容体",
+  moa:"細胞内のグルココルチコイド受容体に結合して核へ移り、炎症性サイトカインの遺伝子発現を抑え、抗炎症タンパク質の発現を増やす。吸入・外用で炎症の場所に高濃度で届け、全身の副作用を減らす。",
+  drugs:[{n:"ブデソニド",en:"budesonide",sm:1},{n:"フルチカゾン",en:"fluticasone",sm:1}],
+  caution:"吸入：口腔カンジダ症、声がれ（うがいで予防）。外用：皮膚萎縮。",src:[],
+  l1:"炎症をまとめて抑える薬を、吸入や塗り薬で炎症の場所に届ける。喘息治療の基本になる薬。",
+  l2:"ステロイドは細胞の中の受容体に結合し、炎症を起こす遺伝子のスイッチを切る。吸入にすると肺に直接届き、全身への影響が少ない。",
+  l4:"GRはNF-κBやAP-1の転写を抑制し、HDAC2の動員も関わる。喫煙者や重症喘息のステロイド抵抗性にはHDAC2の低下が関わるとされる。"},
+ {id:"bron",abbr:"気管支拡張薬",name:"気管支拡張薬（β2刺激薬・抗コリン薬）",en:"Bronchodilators",mod:["sm"],ev:"est",ver:"none",sites:["tissue"],step:4,act:"気道を広げる",
+  target:"β2アドレナリン受容体／ムスカリンM3受容体",
+  moa:"β2刺激薬は気道平滑筋のβ2受容体からcAMPを増やして平滑筋をゆるめ、抗コリン薬はM3受容体をふさいで収縮を防ぐ。発作時の短時間作用型と、毎日使う長時間作用型がある。",
+  drugs:[{n:"サルブタモール",en:"albuterol",sm:1},{n:"ホルモテロール",en:"formoterol",sm:1},{n:"チオトロピウム",en:"tiotropium",sm:1}],
+  caution:"喘息ではβ2刺激薬を単独で使わず、吸入ステロイドと併用する。動悸、手のふるえ。",src:[],
+  l1:"狭くなった気道の筋肉をゆるめて、空気の通り道を広げる吸入薬。",
+  l2:"気道の周りの筋肉（平滑筋）が縮むと息が苦しくなる。β2刺激薬は筋肉をゆるめる信号を強め、抗コリン薬は縮める信号を止める。",
+  l4:"長時間作用型β2刺激薬の単剤使用は喘息関連死の増加が問題になったため、喘息では吸入ステロイドとの配合剤で使う。"},
+ {id:"ige",abbr:"抗IgE",name:"抗IgE抗体",en:"Anti-IgE (omalizumab)",mod:["ab"],ev:"est",ver:"none",sites:["eff"],step:3,act:"IgEを捕まえる",
+  target:"遊離IgE（Cε3ドメイン）",
+  moa:"血中の遊離IgEに結合し、マスト細胞・好塩基球の高親和性IgE受容体（FcεRI）への結合を防ぐ。細胞表面のFcεRIも減り、アレルゲンによる脱顆粒が起こりにくくなる。",
+  drugs:[{n:"オマリズマブ",en:"omalizumab"}],caution:"まれにアナフィラキシー。投与量は体重と血清IgE値で決める。",src:[],
+  l1:"アレルギー反応を起こすIgE抗体を捕まえて、働かないようにする注射薬。",
+  l2:"IgEはマスト細胞にくっついて、アレルゲンが来るとヒスタミンなどを出させる。抗体でIgEを先に捕まえると、この反応が起こりにくくなる。",
+  l4:"受容体に結合済みのIgEには結合しないため、マスト細胞を直接活性化しない。"},
+ {id:"il5",abbr:"抗IL-5",name:"抗IL-5／IL-5受容体抗体",en:"Anti-IL-5 / IL-5Rα",mod:["ab"],ev:"est",ver:"none",sites:["eff"],step:3,act:"好酸球を減らす",
+  target:"IL-5（メポリズマブ）／IL-5受容体α（ベンラリズマブ）",
+  moa:"好酸球の分化と生存に必要なIL-5の作用を止める。ベンラリズマブは低フコース化抗体で、IL-5受容体αをもつ好酸球をADCCで直接除去する。好酸球性の重症喘息で使う。",
+  drugs:[{n:"メポリズマブ",en:"mepolizumab"},{n:"ベンラリズマブ",en:"benralizumab"}],caution:"注射部位反応。寄生虫感染に注意。",src:[],
+  l1:"喘息の炎症に関わる白血球（好酸球）を減らす注射薬。",
+  l2:"好酸球はIL-5というサイトカインで増える。IL-5やその受容体を抗体でふさぐと好酸球が減り、喘息の発作が減る。",
+  l4:"ベンラリズマブはFc糖鎖のフコースを除いてFcγRIIIaへの結合を高め、NK細胞に好酸球を除去させる（モダリティ別「Fc改変抗体」）。"},
+ {id:"il4r",abbr:"抗IL-4Rα",name:"抗IL-4受容体α抗体",en:"Anti-IL-4Rα (dupilumab)",mod:["ab"],ev:"est",ver:"none",sites:["imm"],step:3,act:"IL-4とIL-13の信号を止める",
+  target:"IL-4受容体α鎖",
+  moa:"IL-4受容体α鎖に結合し、これを共有するIL-4とIL-13の両方の信号を止める。2型炎症の中心を抑え、アトピー性皮膚炎、喘息、鼻茸を伴う慢性副鼻腔炎などに使われる。",
+  drugs:[{n:"デュピルマブ",en:"dupilumab"}],caution:"結膜炎、注射部位反応、一時的な好酸球の増加。",src:[],
+  l1:"アレルギーの炎症を起こす2つの信号（IL-4とIL-13）を同時に止める注射薬。アトピー性皮膚炎と喘息の両方に使う。",
+  l2:"IL-4とIL-13は、IgEを増やし、皮膚のバリアを弱め、気道の粘液を増やす。両方が使う受容体の共通部分（IL-4Rα）を抗体でふさぐ。",
+  l4:"IL-4はI型受容体（IL-4Rα/γc）とII型受容体（IL-4Rα/IL-13Rα1）の両方を、IL-13はII型受容体を使う。IL-4Rαを遮断すると両方の経路が止まる。"},
+ {id:"tslp",abbr:"抗TSLP",name:"抗TSLP抗体",en:"Anti-TSLP (tezepelumab)",mod:["ab"],ev:"est",ver:"none",sites:["epi"],step:1,act:"上皮から出る最初の信号を止める",
+  target:"TSLP",
+  moa:"上皮細胞が出すサイトカインTSLPに結合し、樹状細胞やILC2の活性化を止める。2型炎症の上流に作用するため、好酸球が少ないタイプの重症喘息でも効果が報告されている。",
+  drugs:[{n:"テゼペルマブ",en:"tezepelumab"}],caution:"注射部位反応、咽頭炎。",src:[],
+  l1:"皮膚や気道の表面の細胞が最初に出す炎症の信号（TSLP）を止める注射薬。",
+  l2:"TSLPは、アレルゲンやウイルスで上皮が刺激されると出るサイトカインで、その後の免疫反応のきっかけになる。ここを止めると、その下流の反応がまとめて抑えられる。",
+  l4:"TSLPはIL-7RαとTSLPRからなる受容体を介して作用する。"},
+ {id:"jak2",abbr:"JAK阻害",name:"JAK阻害薬（アトピー性皮膚炎）",en:"JAK inhibitors (atopic dermatitis)",mod:["sm"],ev:"est",ver:"none",sites:["imm","tissue"],step:3,act:"複数の信号をまとめて止める",
+  target:"JAK1 など",
+  moa:"IL-4、IL-13、IL-31などのサイトカインは受容体からJAKを使って信号を伝える。JAK阻害薬はこれらをまとめて抑え、かゆみも早く減らす。外用薬（デルゴシチニブ、日本で開発）と内服薬がある。",
+  drugs:[{n:"デルゴシチニブ（外用）",en:"delgocitinib",sm:1},{n:"アブロシチニブ",en:"abrocitinib",sm:1},{n:"ウパダシチニブ",en:"upadacitinib",sm:1}],
+  caution:"内服：帯状疱疹、感染症、血栓症、ざ瘡。外用：塗った部位の毛包炎など。",src:[],
+  l1:"炎症とかゆみの信号を細胞の中で止める薬。塗り薬と飲み薬がある。",
+  l2:"かゆみや炎症を起こすいくつものサイトカインは、細胞の中でJAKという酵素を使う。JAKを止めると、それらの作用が同時に弱まる。",
+  l4:"IL-31受容体もJAK1/JAK2を使うため、JAK阻害はかゆみの神経シグナルにも作用する。"},
+ {id:"il31",abbr:"抗IL-31RA",name:"抗IL-31受容体A抗体",en:"Nemolizumab",mod:["ab"],ev:"est",ver:"none",sites:["tissue"],step:4,act:"かゆみの信号を止める",
+  target:"IL-31受容体A",
+  moa:"かゆみを起こすサイトカインIL-31の受容体に結合し、感覚神経へのかゆみの信号を止める。日本（中外製薬）で創製された。",
+  drugs:[{n:"ネモリズマブ",en:"nemolizumab"}],caution:"注射部位反応、感染症。",src:[],
+  l1:"かゆみを起こす信号（IL-31）を受け取る部分をふさいで、かゆみを止める注射薬。日本で創られた。",
+  l2:"IL-31は皮膚の感覚神経に作用してかゆみを起こす。かくと皮膚のバリアがさらに壊れるため、かゆみを止めることが治療になる。",
+  l4:"IL-31はIL-31RAとOSMRβのヘテロ二量体受容体に結合する。"}
+ ]});
+
+DATA.virus=dz({default:"pi2",
+ zones:[{id:"out",label:"細胞外・細胞膜",sub:"吸着・侵入・放出"},{id:"cyto",label:"細胞質",sub:"脱殻・複製・切断"},{id:"nuc",label:"核",sub:"組み込み（HIV）"},{id:"immune",label:"予防",sub:"ワクチン"}],
+ classes:[
+ {id:"entry",abbr:"侵入阻害",name:"侵入阻害薬・中和抗体",en:"Entry inhibitors and neutralizing antibodies",mod:["sm","ab"],ev:"est",ver:"none",sites:["out"],step:0,act:"細胞に入らせない",
+  target:"CCR5（マラビロク）／ウイルス表面のタンパク質（中和抗体）",
+  moa:"マラビロクは、HIVが細胞に入るときに使うヒトの補助受容体CCR5に結合して侵入を防ぐ。中和抗体はウイルス表面のタンパク質（RSウイルスのFタンパク質など）に結合し、細胞への結合や膜融合を防ぐ。",
+  drugs:[{n:"マラビロク",en:"maraviroc",sm:1},{n:"ニルセビマブ（RSウイルス）",en:"nirsevimab"}],
+  caution:"マラビロクはCCR5を使うHIVにだけ効く（事前検査が必要）。",src:[],
+  l1:"ウイルスが細胞にくっついて入り込むのを止める。",
+  l2:"ウイルスは細胞表面の特定のタンパク質（受容体）に結合して入る。受容体をふさぐ薬や、ウイルス側に結合する抗体で侵入を防ぐ。",
+  l4:"ニルセビマブはRSウイルスFタンパク質の融合前構造（部位Ø）に結合し、YTE改変で半減期を延ばして1シーズン1回の投与にしている。"},
+ {id:"rt",abbr:"逆転写酵素阻害",name:"逆転写酵素阻害薬（HIV）",en:"Reverse transcriptase inhibitors",mod:["sm"],ev:"est",ver:"none",sites:["cyto"],step:2,act:"RNAからDNAを作らせない",
+  target:"HIV逆転写酵素",
+  moa:"HIVはRNAをDNAに書き換える逆転写酵素を使う。核酸系（NRTI：テノホビル、エムトリシタビン）はDNA鎖に取り込まれて伸長を止め、非核酸系（NNRTI：リルピビリンなど）は酵素の別の部位に結合して働きを止める。",
+  drugs:[{n:"テノホビル アラフェナミド",en:"tenofovir alafenamide",sm:1},{n:"エムトリシタビン",en:"emtricitabine",sm:1},{n:"リルピビリン",en:"rilpivirine",sm:1}],
+  caution:"腎機能障害・骨密度低下（テノホビル ジソプロキシル）。B型肝炎を合併している場合、中止で肝炎が悪化することがある。",src:[],
+  l1:"HIVが自分の遺伝子をDNAに書き換えるための酵素を止める飲み薬。",
+  l2:"HIVの遺伝子はRNAで、細胞の中で逆転写酵素によってDNAに変えられる。偽のDNA材料を混ぜて書き換えを途中で止めたり、酵素に直接結合して止めたりする。",
+  l4:"NRTIは3'-OHをもたないため次の結合が作れず、鎖が止まる。NNRTIは活性部位近くの疎水性ポケットに結合するアロステリック阻害薬で、K103Nなど1アミノ酸の変異で耐性になりやすい。"},
+ {id:"insti",abbr:"インテグラーゼ阻害",name:"インテグラーゼ阻害薬（HIV）",en:"Integrase inhibitors",mod:["sm"],ev:"est",ver:"none",sites:["nuc"],step:2,act:"染色体への組み込みを止める",
+  target:"HIVインテグラーゼ（鎖転移反応）",
+  moa:"HIVのDNAをヒトの染色体に組み込む酵素インテグラーゼの鎖転移反応を阻害する。現在の抗HIV療法の中心で、ドルテグラビル、ビクテグラビルなどがある。カボテグラビルには長時間作用型の注射剤もある。",
+  drugs:[{n:"ドルテグラビル",en:"dolutegravir",sm:1},{n:"ビクテグラビル",en:"bictegravir",sm:1},{n:"カボテグラビル",en:"cabotegravir",sm:1}],
+  caution:"体重増加、不眠。制酸剤など多価陽イオンで吸収が下がる。",src:[],
+  l1:"HIVの遺伝子が人の遺伝子に組み込まれるのを止める飲み薬。いまのHIV治療の中心。",
+  l2:"HIVはDNAに変わった後、インテグラーゼという酵素で人の染色体に入り込み、そこから増える。この組み込みを止める。",
+  l4:"活性部位にある2つのMg²⁺にキレート結合する（鎖転移阻害薬）。"},
+ {id:"pi2",abbr:"プロテアーゼ阻害",name:"プロテアーゼ阻害薬",en:"Protease inhibitors",mod:["sm"],ev:"est",ver:"none",sites:["cyto"],step:3,act:"ウイルスのタンパク質を切らせない",
+  target:"HIVプロテアーゼ／SARS-CoV-2 メインプロテアーゼ（3CLpro）",
+  moa:"ウイルスは長くつながったタンパク質（ポリタンパク質）を作り、自分のプロテアーゼで切り分けて機能をもたせる。この切断を止めると、感染性のあるウイルスができない。HIVではダルナビル、新型コロナではニルマトレルビル（リトナビルと併用）とエンシトレルビル（日本で開発）がある。",
+  drugs:[{n:"ダルナビル",en:"darunavir",sm:1},{n:"ニルマトレルビル",en:"nirmatrelvir",sm:1},{n:"エンシトレルビル",en:"ensitrelvir",sm:1}],
+  caution:"リトナビル・コビシスタット（CYP3Aを阻害する増強剤）による多くの薬物相互作用。",src:[],
+  l1:"ウイルスが自分のタンパク質を切り分ける酵素を止めて、完成したウイルスを作らせない飲み薬。",
+  l2:"ウイルスのタンパク質は最初1本の長い鎖として作られ、プロテアーゼで切られて部品になる。切れないと部品ができず、ウイルスが完成しない。",
+  l4:"HIVプロテアーゼはアスパラギン酸プロテアーゼのホモ二量体、SARS-CoV-2のMproはシステインプロテアーゼ。ニルマトレルビルはCys145と可逆的な共有結合を作るニトリル基をもつ。エンシトレルビルは非共有結合型。"},
+ {id:"pol",abbr:"RNA合成阻害",name:"RNAポリメラーゼ・エンドヌクレアーゼ阻害薬",en:"Polymerase and endonuclease inhibitors",mod:["sm"],ev:"est",ver:"none",sites:["cyto"],step:2,act:"ウイルスの遺伝子を複製させない",
+  target:"RNA依存性RNAポリメラーゼ（RdRp）／キャップ依存性エンドヌクレアーゼ（インフルエンザのPA）",
+  moa:"レムデシビルはヌクレオチドの類似体で、ウイルスのRNAポリメラーゼに取り込まれてRNA合成を止める。バロキサビル マルボキシルは、インフルエンザウイルスが宿主mRNAの先端（キャップ）を切り取って使う反応（キャップスナッチング）を止める。日本で開発された単回投与の薬。",
+  drugs:[{n:"レムデシビル",en:"remdesivir",sm:1},{n:"バロキサビル マルボキシル",en:"baloxavir marboxil",sm:1}],
+  caution:"バロキサビル：耐性変異（PA I38T）が出やすく、特に小児で注意。レムデシビル：肝機能障害。",src:[],
+  l1:"ウイルスが自分の遺伝子をコピーするのを止める薬。",
+  l2:"RNAウイルスは自分専用のRNAポリメラーゼで遺伝子を複製する。偽の材料を取り込ませて止めたり、インフルエンザでは複製に必要な準備（キャップの切り取り）を止めたりする。",
+  l4:"レムデシビルはC1'位にシアノ基をもつアデノシン類似体のプロドラッグで、取り込まれた後に数塩基伸びてから停止する（遅延性の鎖停止）。"},
+ {id:"caps",abbr:"カプシド阻害",name:"カプシド阻害薬（HIV）",en:"Capsid inhibitors (lenacapavir)",mod:["sm"],ev:"est",ver:"none",sites:["cyto"],step:1,act:"カプシドの働きを止める",
+  target:"HIVカプシドタンパク質（p24）",
+  moa:"HIVのカプシド（遺伝子を包む殻）に結合し、核への移行、ウイルスの組み立て、カプシドの形成など複数の段階を止める。皮下注射で6か月に1回の投与ができる。",
+  drugs:[{n:"レナカパビル",en:"lenacapavir",sm:1}],caution:"注射部位の硬結・結節。",src:[],
+  l1:"HIVの遺伝子を包む殻（カプシド）に結合して、ウイルスが増える複数の段階を止める薬。半年に1回の注射で効く。",
+  l2:"カプシドは、殻を脱ぐ段階、核への移動、新しいウイルスの組み立てまで、何度も役割を果たす。ここに結合すると、それらがまとめて止まる。",
+  l4:"カプシド六量体の隣り合うサブユニット間のポケットに結合し、宿主因子（CPSF6、Nup153）との相互作用を妨げる。"},
+ {id:"nai",abbr:"ノイラミニダーゼ阻害",name:"ノイラミニダーゼ阻害薬（インフルエンザ）",en:"Neuraminidase inhibitors",mod:["sm"],ev:"est",ver:"none",sites:["out"],step:4,act:"できたウイルスを細胞から離さない",
+  target:"インフルエンザウイルスのノイラミニダーゼ",
+  moa:"新しくできたウイルスは、細胞表面のシアル酸にくっついたままになる。ノイラミニダーゼがシアル酸を切ってウイルスを放出する。これを阻害すると、ウイルスが周りの細胞に広がれない。発症後48時間以内に始める。",
+  drugs:[{n:"オセルタミビル",en:"oseltamivir",sm:1},{n:"ザナミビル",en:"zanamivir",sm:1},{n:"ラニナミビル",en:"laninamivir",sm:1},{n:"ペラミビル",en:"peramivir",sm:1}],
+  caution:"悪心・下痢。耐性変異（H275Yなど）。",src:[],
+  l1:"細胞から新しいウイルスが外に出ていくのを止める薬。インフルエンザで使う。",
+  l2:"インフルエンザウイルスは細胞の表面から出ていくとき、ノイラミニダーゼという酵素で細胞とのつながりを切る。この酵素を止めると、ウイルスが広がれなくなる。",
+  l4:"反応の遷移状態にあるシアル酸（オキソカルベニウムイオン）を模倣して設計された、構造に基づく創薬の代表例。ラニナミビルは日本で開発された長時間作用型の吸入薬で、1回の投与で済む。"},
+ {id:"vac",abbr:"ワクチン",name:"ワクチン",en:"Vaccines",mod:["vac"],ev:"est",ver:"none",sites:["immune"],step:0,act:"感染する前に免疫を作る",
+  target:"ウイルスの抗原（スパイクタンパク質、ヘマグルチニンなど）",
+  moa:"ウイルスの一部（タンパク質）やその設計図（mRNA）を投与して、感染する前に抗体と記憶T細胞を作らせる。感染や重症化を防ぐ。",
+  drugs:[{n:"COVID-19 mRNAワクチン",en:"Comirnaty"},{n:"インフルエンザワクチン",en:"influenza vaccine"}],
+  caution:"接種部位の痛み、発熱。まれにアナフィラキシー。mRNAワクチンでは若い男性での心筋炎が報告されている。",src:[],
+  l1:"ウイルスに感染する前に、前もって免疫（抗体と記憶細胞）を作らせておく注射。",
+  l2:"ウイルスの一部や設計図を体に入れると、免疫がそれを覚える。本物のウイルスが入ってきたとき、すばやく抗体を出して増殖を抑える。",
+  l4:"SARS-CoV-2のスパイクには融合前構造を安定化する2つのプロリン置換（K986P/V987P）が入っている。インフルエンザワクチンは毎年の流行予測株で製造する。"}
+ ]});
+
+// level texts for the original two diseases' classes
+const CLV={
+insulin:{l1:"足りないインスリンを注射で補い、血液の中の糖を筋肉や肝臓に取り込ませる。",l2:"インスリンはタンパク質のホルモンで、細胞表面の受容体に結合すると、糖を運ぶGLUT4が細胞膜に移動して糖が取り込まれる。注射で量とタイミングを調節する。",l4:"受容体はα2β2型の受容体型チロシンキナーゼで、自己リン酸化の後にIRS–PI3K–AKT経路とRas–MAPK経路を活性化する。製剤はアミノ酸置換や脂肪酸修飾で、六量体が解離する速さを調節している（モダリティ別「組換えホルモン・アナログ」）。"},
+su:{l1:"すい臓の細胞に直接はたらき、インスリンを多く出させる飲み薬。",l2:"β細胞のカリウムチャネル（KATP）を閉じると細胞が興奮し、カルシウムが入ってインスリンが放出される。血糖が低くても出させるので、低血糖に注意が必要。",l4:"KATPはKir6.2四量体とSUR1四量体からなるヘテロ八量体。SU薬はSUR1に結合して開口確率を下げる。KCNJ11やABCC8の変異による新生児糖尿病では、SU薬が有効な例がある。"},
+glinide:{l1:"SU薬と同じしくみで、短い時間だけインスリンを出させる。食事の直前に飲む。",l2:"KATPチャネルを閉じる作用はSU薬と同じだが、すぐ効いてすぐ消えるので、食後に上がる血糖を中心に下げる。",l4:"SUR1との結合と解離が速く、作用時間が短い。ミチグリニドなど国内で使われる薬剤が多い。"},
+dpp4:{l1:"食事のあとに腸から出るホルモン（インクレチン）が分解されないようにして、その働きを長持ちさせる飲み薬。",l2:"GLP-1とGIPは血糖が高いときにインスリン分泌を強めるホルモン。分解酵素DPP-4を止めると濃度が上がる。血糖が高いときだけ効くので、低血糖を起こしにくい。",l4:"DPP-4は、N末端から2番目がAlaまたはProのペプチドからジペプチドを切り離す。GLP-1はHis-Ala、GIPはTyr-Alaが切断されて不活化される。"},
+glp1:{l1:"腸から出るホルモンGLP-1に似せた薬。インスリンを出させ、食欲を抑える。",l2:"GLP-1受容体に結合してインスリン分泌を強め、胃から腸へ食べ物が進むのを遅らせ、脳で食欲を抑える。体重が減りやすい。多くは注射。",l4:"セマグルチドはAib置換によるDPP-4耐性と、脂肪二酸によるアルブミン結合で週1回の投与にしている。経口剤は吸収促進剤SNACと配合して胃から吸収させる。"},
+tirz:{l1:"GLP-1とGIPという2つのホルモンの両方の働きをまねる、週1回の注射薬。",l2:"GIP受容体とGLP-1受容体の両方を刺激し、血糖が高いときにインスリンを出させ、グルカゴンを下げ、食欲を抑える。",l4:"39残基のペプチドで、2位と13位がAib、C末端はアミド、20位のリシンにリンカーを介してC20脂肪二酸が付いている。アルブミン結合率は99%、半減期は約5日（米国添付文書）。"},
+met:{l1:"肝臓が糖を作りすぎるのを抑える飲み薬。昔から使われているが、しくみはまだ完全にはわかっていない。",l2:"肝臓での糖の合成（糖新生）を減らして空腹時の血糖を下げる。ミトコンドリアのエネルギー産生に作用し、AMPKという酵素が活性化することなどがわかっている。",l4:"腸管での作用（GLP-1分泌の増加、腸内細菌叢の変化）や、GDF15の上昇による体重への作用も報告されている。どの機序が臨床効果の主因かは決着していない。"},
+tzd:{l1:"脂肪の細胞の働きを変えて、インスリンが効きやすい体にする飲み薬。",l2:"核内受容体PPARγに結合して遺伝子のスイッチを入れ、脂肪細胞を小さく健康な状態にする。その結果、筋肉や肝臓でもインスリンが効きやすくなる。",l4:"PPARγはRXRとヘテロ二量体を作り、PPREに結合する転写因子。むくみには、腎臓の集合管でのナトリウム再吸収の増加が関わるとされる。"},
+agi:{l1:"腸で糖が吸収されるのをゆっくりにして、食後の血糖の急上昇を防ぐ飲み薬。",l2:"砂糖やでんぷんは、小腸で酵素（α-グルコシダーゼ）によりブドウ糖に分解されてから吸収される。その酵素を止めて吸収を遅らせる。",l4:"スクラーゼ・イソマルターゼやマルターゼ・グルコアミラーゼを競合阻害する。アカルボースは擬四糖、ミグリトールは吸収されるイミノ糖。"},
+sglt2:{l1:"腎臓で尿から糖を体に戻す輸送体を止めて、余分な糖を尿に出す飲み薬。",l2:"腎臓でろ過された糖の大部分は、SGLT2という輸送体で血液に戻される。これを止めると1日に数十グラムの糖が尿に出て、血糖が下がる。",l4:"ろ過された糖の約90%をSGLT2が、残りを下流のSGLT1が再吸収する。阻害薬はフロリジンをもとにしたC-グリコシド構造で、SGLT1に対する選択性が高い。心臓・腎臓を守る作用の機序は研究が続いている。"},
+imeg:{l1:"ミトコンドリア（細胞の中でエネルギーを作る小器官）に作用すると考えられている、日本で使われている飲み薬。",l2:"血糖が高いときのインスリン分泌を強め、肝臓や筋肉でインスリンが効きやすくする。メトホルミンに似た構造をもつが、作用のしかたは異なると考えられている。",l4:"報告されている分子機序は、NAMPT発現の増加によるNAD⁺生成の促進と、呼吸鎖複合体Iの競合阻害による活性酸素産生の低下。添付文書では作用機序を「想定」と記載している。"},
+alk:{l1:"がん細胞のDNAに直接くっついて傷をつけ、細胞が分裂できなくする。",l2:"DNAの塩基に化学的な結合（アルキル化）を作り、2本の鎖をつないでしまう。DNAをコピーできなくなった細胞は死ぬ。分裂が速い正常細胞（骨髄など）も影響を受ける。",l4:"シクロホスファミドは肝臓で4-ヒドロキシ体になり、ホスホラミドマスタードとアクロレインに分解される。テモゾロミドは酵素を介さずにMTICに変わる。耐性にはMGMTやミスマッチ修復の状態が関わる。"},
+pt:{l1:"白金（プラチナ）を含む薬で、がん細胞のDNAにくっついて傷をつける。",l2:"白金がDNAのグアニンに結合して鎖の中にねじれを作り、複製や転写を止める。",l4:"シスプラチンは細胞内の低い塩化物イオン濃度でアクア化されて反応性になる。主な付加体は隣接グアニン間の鎖内架橋。耐性にはヌクレオチド除去修復の亢進、グルタチオンによる不活化、取り込み低下が関わる。"},
+anti:{l1:"DNAの材料に似せた物質で、がん細胞がDNAを作れないようにする。",l2:"DNAを作るための酵素を止めたり、偽の材料としてDNAに入り込んだりして、細胞が分裂の準備（DNAの複製）をできなくする。",l4:"5-FUの効果は、ロイコボリン併用でチミジル酸合成酵素–FdUMP–葉酸の三者複合体が安定化して強まる。ゲムシタビンはDNAに取り込まれた後、もう1塩基伸びてから停止する。"},
+topo:{l1:"DNAのねじれを直す酵素を止め、がん細胞のDNAを切れたままにする。",l2:"DNAをほどくとき、トポイソメラーゼという酵素がDNAを一度切ってつなぎ直す。薬はこの酵素がDNAを切った状態で止めるので、DNAの切れ目がたまって細胞が死ぬ。",l4:"酵素の触媒を止めるのではなく、切断複合体を安定化させる（トポイソメラーゼ毒）。複製フォークが衝突すると二本鎖切断に変わる。"},
+parp:{l1:"DNAの傷を直す仕組みが弱いがん細胞（BRCA変異など）で、残りの修復の仕組みも止めて細胞を死なせる。",l2:"細胞にはDNAの傷を直す方法が複数ある。BRCA遺伝子に変異があるがんは1つの方法が使えないので、PARPによる別の修復を止めると修復しきれずに死ぬ。正常な細胞はBRCAが働くので生き残る（合成致死）。",l4:"PARP1は一本鎖切断を認識してポリ(ADP-リボース)を合成し、修復因子を呼ぶ。PARPをDNA上に捕捉する強さは薬剤ごとに異なる。耐性はBRCAの復帰変異や53BP1の喪失などで起こる。"},
+egfr:{l1:"がん細胞を増やす信号（EGFR）が出たままになっているがんで、その信号を止める飲み薬。",l2:"EGFRは細胞の外から増殖の信号を受け取る受容体。肺がんの一部ではEGFR遺伝子の変異で常に信号が出ている。薬はEGFRの酵素部分（キナーゼ）に結合して信号を止める。遺伝子検査で変異がある人に使う。",l4:"第1世代（ゲフィチニブ、エルロチニブ）は可逆的、第2世代（アファチニブ）は共有結合でHER2なども阻害、第3世代（オシメルチニブ）は変異EGFRに選択的でT790Mに有効。耐性にはC797S、MET増幅、小細胞がんへの形質転換などがある。"},
+her2:{l1:"がん細胞の表面に多いHER2というタンパク質に結合して、増殖を止め、免疫細胞に攻撃させる抗体。",l2:"HER2が多いがんで使う。抗体がHER2に結合して増殖の信号を弱め、さらにNK細胞などを呼び寄せてがん細胞を攻撃させる。",l4:"HER2はリガンドをもたず、他のHERとの二量体（特にHER3との組み合わせ）で強い信号を出す。HER2低発現のがんには、抗体薬物複合体（トラスツズマブ デルクステカン）が使われる。"},
+adc:{l1:"抗体に強い抗がん剤をつないだ薬。抗体ががん細胞を見つけて、抗がん剤を細胞の中まで届ける。",l2:"抗体部分ががん細胞表面のタンパク質に結合し、細胞の中に取り込まれてから抗がん剤が外れる。狙った細胞に直接届けるので、少ない量で強く効かせられる。",l4:"有効性は、ペイロードの膜透過性（バイスタンダー効果）、DAR、リンカーの血中安定性、抗原の内在化の速さで決まる。トラスツズマブ デルクステカンのリンカー（GGFG）はリソソームのカテプシンで切断される。"},
+kras:{l1:"これまで薬が作れないと言われていたKRASの一部の変異を、ねらって止める薬。",l2:"KRASは増殖の信号を伝えるスイッチ役のタンパク質。G12Cという変異では12番目のアミノ酸がシステインに変わっており、薬はそのシステインに結合してKRASをOFFの状態に固定する。",l4:"KRAS G12Cは自身のGTP加水分解活性がある程度残るため、GDP結合型を経由する。耐性にはKRASの別の変異、増幅、上流の受容体の再活性化などがある。G12Dなど他の変異やRAS(ON)阻害薬の開発が進んでいる。"},
+braf:{l1:"がんを増やす信号の通り道（RAF→MEK）を2か所で止める、組み合わせの飲み薬。",l2:"BRAFの600番目のアミノ酸が変わる変異（V600E）では、増殖の信号が出続ける。BRAF阻害薬と、その下流のMEK阻害薬を一緒に使って信号を止める。",l4:"第1世代のBRAF阻害薬は、RASが活性化した細胞ではRAF二量体を逆に活性化してしまう（皮膚の扁平上皮がんの原因）。MEK阻害薬はATP非競合のアロステリック阻害薬。"},
+pi3k:{l1:"細胞の増殖や生き残りを進める信号（PI3K–mTOR）を止める飲み薬。",l2:"PI3K→AKT→mTORと信号が伝わると、細胞は栄養を取り込んで増える。アルペリシブはPI3Kに変異があるがんに、エベロリムスはmTORに作用する。PI3Kはインスリンの信号にも使われるので血糖が上がる。",l4:"アルペリシブはp110α選択的で、PIK3CAのホットスポット変異（H1047R、E545Kなど）をもつ乳がんに使う。エベロリムスはmTORC1を部分的にしか阻害せず、S6K–IRS1の負のフィードバックが外れてAKTが再び活性化される。"},
+bcrabl:{l1:"白血病の原因となる異常なタンパク質（BCR-ABL）を止める飲み薬。分子標的薬の代表例。",l2:"9番と22番の染色体の一部が入れ替わってできたBCR-ABLは、増殖の信号を出し続ける酵素（キナーゼ）になる。イマチニブはこの酵素の活性部位に結合して止め、慢性骨髄性白血病の治療成績を大きく変えた。",l4:"イマチニブはDFG-outの不活性型の立体配座に結合する。ゲートキーパー変異T315Iにはイマチニブ・ダサチニブ・ニロチニブが効かず、ポナチニブやアシミニブが使われる。"},
+cdk:{l1:"がん細胞が分裂の準備を始める段階（G1期）で、細胞周期を止める飲み薬。",l2:"細胞はG1期→S期→G2期→M期の順に分裂する。CDK4/6はG1期からS期へ進めるスイッチ。これを止めると細胞は増えなくなる。ホルモン受容体陽性の乳がんで、ホルモン療法と一緒に使う。",l4:"Rbが機能していることが前提で、RB1の喪失は耐性の原因になる。パルボシクリブは好中球減少のため3週投与・1週休薬、アベマシクリブは連日投与。"},
+mt:{l1:"細胞が分裂するときに染色体を引き分ける管状の構造（微小管）の働きを止め、分裂できなくする。",l2:"微小管はチューブリンというタンパク質がつながった管。分裂期に染色体を両側に分ける。タキサン系は微小管を固めて動けなくし、ビンカアルカロイドは微小管を作れなくする。",l4:"タキサンはβチューブリンのタキサン部位に、ビンカはα/β界面のビンカ部位に結合する。紡錘体チェックポイントでM期に停止した後、細胞死や異常な分裂が起こる。耐性にはP糖タンパク質による排出などが関わる。"},
+vegf:{l1:"がんが栄養を得るために作らせる新しい血管を、作らせないようにする薬。",l2:"がんは大きくなるとVEGFというタンパク質を出して血管を呼び寄せる。VEGFやその受容体をブロックすると、がんへの血流が減る。",l4:"VEGF-Aは主にVEGFR2を活性化し、内皮細胞の増殖・遊走・透過性亢進を起こす。高血圧と蛋白尿は作用そのものに由来する副作用（一酸化窒素の産生低下、糸球体の障害）とされる。"},
+pd1:{l1:"がん細胞がT細胞（がんを攻撃する免疫細胞）の働きを止めるために使う結合（PD-1とPD-L1）をふさぎ、T細胞ががんを攻撃できるようにする抗体。",l2:"T細胞のPD-1にがん細胞のPD-L1が結合すると、T細胞の攻撃が止まる。抗体がこの結合をふさぐとT細胞が再び働く。薬が直接がんを壊すのではなく、自分の免疫が攻撃する。2018年のノーベル生理学・医学賞（本庶佑氏ら）の研究に基づく。",l4:"PD-1はITSMモチーフを介してSHP2を呼び、CD28やTCRの信号を弱める。効果の予測には、PD-L1の発現、MSI-high/dMMR、腫瘍遺伝子変異量（TMB）が使われる。"},
+ctla4:{l1:"免疫が働き始める段階で、T細胞の活性化を止める分子（CTLA-4）をふさぐ抗体。",l2:"T細胞が働き始めるには、抗原の認識に加えてCD28という分子への刺激が必要。CTLA-4はCD28の相手を奪って活性化を止める。抗体でCTLA-4をふさぐと、がんを攻撃するT細胞が増える。",l4:"CTLA-4はB7に対してCD28より高い親和性をもち、抗原提示細胞からB7を取り除く（トランスエンドサイトーシス）。抗PD-1抗体との併用で効果が増すが、免疫関連の有害事象も増える。"},
+cart:{l1:"患者さん自身のT細胞を取り出し、がんを見つける受容体の遺伝子を入れて体に戻す治療。",l2:"T細胞にCARという人工の受容体を作らせると、がん細胞表面のCD19やBCMAを直接見つけて攻撃する。1回の点滴で、体の中で増えて長く働く。主に血液のがんで使う。",l4:"承認されているCARは共刺激ドメインを1つもつ第2世代が中心。標的抗原の消失やT細胞の疲弊が再発の原因になる。採取から投与まで数週間かかる。"},
+bite:{l1:"片方の腕でT細胞を、もう片方でがん細胞をつかみ、2つを近づけて攻撃させる抗体。",l2:"二重特異性抗体は2種類の相手に結合できる。T細胞のCD3とがん細胞の抗原を同時につかむと、T細胞ががん細胞を攻撃する。CAR-Tと違い、細胞を加工せずに薬として使える。",l4:"CD3への親和性や結合価（1価・2価）でサイトカイン放出の強さが変わる。サイトカイン放出症候群を避けるため、少量から段階的に増やして投与する。"}
+};
+for(const dzk of ["diabetes","cancer"]) for(const c of DATA[dzk].classes) Object.assign(c,CLV[c.id]||{});
+const STEPS={insulin:[2,"注射で補う"],su:[2,"インスリンを出させる"],glinide:[2,"食前に出させる"],dpp4:[2,"出やすくする"],glp1:[2,"出させる・食欲を抑える"],tirz:[2,"出させる・食欲を抑える"],met:[3,"肝臓の糖づくりを減らす"],tzd:[3,"効きやすくする"],agi:[0,"糖の吸収を遅らせる"],sglt2:[1,"余分な糖を尿に出す"],imeg:[2,"出させる・効きやすくする"],
+ alk:[2,"DNAを壊して増殖を止める"],pt:[2,"DNAを壊して増殖を止める"],anti:[2,"DNAを作らせない"],topo:[2,"DNAを切れたままにする"],parp:[2,"DNAの修復を止める"],egfr:[1,"信号を止める"],her2:[1,"信号を止める"],kras:[1,"信号を止める"],braf:[1,"信号を止める"],pi3k:[1,"信号を止める"],bcrabl:[1,"信号を止める"],cdk:[2,"分裂の準備を止める"],mt:[2,"分裂を止める"],adc:[2,"抗がん剤を直接届ける"],vegf:[3,"血管を作らせない"],pd1:[4,"免疫に攻撃させる"],ctla4:[4,"免疫に攻撃させる"],cart:[4,"免疫細胞で攻撃する"],bite:[4,"免疫細胞で攻撃させる"]};
+for(const dzk of ["diabetes","cancer"]) for(const c of DATA[dzk].classes){const s=STEPS[c.id];if(s){c.step=s[0];c.act=s[1];}}
+
+// disease-level explanation, flow and statistics
+const SRC={
+ jinkou:{k:"公的",t:"令和6年(2024)人口動態統計（確定数）の概況 第9表",u:"https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/kakutei24/dl/15_gaikyouR06.pdf"},
+ kanja:{k:"公的",t:"令和5年(2023)患者調査の概況（厚生労働省）",u:"https://www.mhlw.go.jp/toukei/saikin/hw/kanja/23/index.html"},
+ kDM:{k:"二次",t:"糖尿病の総患者数 552万2,000人（令和5年患者調査の解説）",u:"https://www.seikatsusyukanbyo.com/statistics/2025/010845.php"},
+ kLip:{k:"二次",t:"脂質異常症の総患者数（令和5年患者調査の解説）",u:"https://www.seikatsusyukanbyo.com/statistics/2025/010843.php"},
+ kCa:{k:"二次",t:"悪性新生物の総患者数（令和5年患者調査の解説）",u:"https://www.seikatsusyukanbyo.com/statistics/2025/010837.php"},
+ whoDM:{k:"国際機関",t:"WHO Fact sheet: Diabetes",u:"https://www.who.int/news-room/fact-sheets/detail/diabetes"},
+ iarc:{k:"国際機関",t:"IARC: Global cancer burden（GLOBOCAN 2022）",u:"https://www.iarc.who.int/news-events/global-cancer-burden-growing-amidst-mounting-need-for-services/"},
+ whoRA:{k:"国際機関",t:"WHO Fact sheet: Rheumatoid arthritis",u:"https://www.who.int/news-room/fact-sheets/detail/rheumatoid-arthritis"},
+ raJP:{k:"公的",t:"厚生労働科学研究 関節リウマチ患者の現状に関する研究（研究概要）",u:"https://mhlw-grants.niph.go.jp/project/24914"},
+ whoCVD:{k:"国際機関",t:"WHO Fact sheet: Cardiovascular diseases",u:"https://www.who.int/news-room/fact-sheets/detail/cardiovascular-diseases-(cvds)"},
+ dem:{k:"二次",t:"認知症の高齢者 2022年推計（厚労省研究班の公表の報道）",u:"https://medical-saponet.mynavi.jp/news/newstopics/detail_4330/"},
+ whoDem:{k:"国際機関",t:"WHO Fact sheet: Dementia",u:"https://www.who.int/news-room/fact-sheets/detail/dementia"},
+ nanbyo:{k:"公的",t:"難病情報センター 脊髄性筋萎縮症（指定難病3）",u:"https://www.nanbyou.or.jp/entry/135"},
+ hemoJP:{k:"公的",t:"血液凝固異常症全国調査 令和6年度報告書",u:"https://api-net.jfap.or.jp/image/data/blood/r06_research/r06_research.pdf"},
+ wfh:{k:"国際機関",t:"世界血友病連盟 2022年次グローバル調査",u:"https://wfh.org/wp-content/uploads/2024/03/WFH-AGS2022-Report-JA.pdf"},
+ whoAs:{k:"国際機関",t:"WHO Fact sheet: Asthma",u:"https://www.who.int/news-room/fact-sheets/detail/asthma"},
+ hivJP:{k:"公的",t:"令和6(2024)年エイズ発生動向 分析結果（API-Net）",u:"https://api-net.jfap.or.jp/status/japan/data/2024/nenpo/bunseki.pdf"},
+ whoHIV:{k:"国際機関",t:"WHO Fact sheet: HIV and AIDS",u:"https://www.who.int/news-room/fact-sheets/detail/hiv-aids"},
+ whoFlu:{k:"国際機関",t:"WHO Fact sheet: Influenza (seasonal)",u:"https://www.who.int/news-room/fact-sheets/detail/influenza-(seasonal)"}
+};
+const DLV={
+diabetes:{
+ l1:"血液の中の糖（血糖）が高いままになる病気。すい臓から出るインスリンというホルモンが足りない、または効きにくいことが原因。高い血糖が続くと、目・腎臓・神経などの細い血管が傷つく。",
+ l2:"インスリンは血糖を下げる唯一のホルモンで、血液中の糖を細胞に取り込ませる。1型は免疫がインスリンを作るβ細胞を壊してしまう病気。2型は遺伝と生活習慣でインスリンの出が悪くなったり効きにくくなったりする病気で、日本の患者の大半は2型。",
+ l3:"2型糖尿病の本態は、β細胞のインスリン分泌不全と、肝臓・筋肉・脂肪組織のインスリン抵抗性。高血糖そのものがβ細胞の機能をさらに悪化させる（糖毒性）。治療はHbA1c（過去1〜2か月の平均血糖を反映）を指標に、分泌促進・抵抗性改善・糖排泄・吸収遅延という作用点の異なる薬を組み合わせる。",
+ l4:"2型糖尿病では、β細胞量の減少と機能不全、α細胞からのグルカゴン過剰、インクレチン効果の減弱、腎臓での糖再吸収の亢進、中枢の食欲調節の異常など、複数の異常が重なる。日本人はインスリン分泌能が比較的低く、肥満が軽くても発症しやすいとされる。GLP-1受容体作動薬やSGLT2阻害薬が心血管・腎のアウトカムを改善することが大規模試験で示され、血糖以外の効果で薬を選ぶ流れが強まっている。",
+ flow:["食事で糖をとる","血糖が上がる","すい臓が\nインスリンを出す","筋肉・肝臓が\n糖を取り込む","血糖が下がる"],prob:{2:"足りない（1型・2型）",3:"効きにくい（2型）"},
+ stats:[{l:"国内の総患者数",v:"552.2万人",y:"2023年",s:"kDM"},{l:"国内の死亡数",v:"14,959人",y:"2024年",s:"jinkou"},{l:"死亡率（人口10万対）",v:"12.4",y:"2024年",s:"jinkou"},{l:"世界の患者数",v:"約8.3億人",y:"2022年",s:"whoDM"},{l:"世界の死亡数（直接死因）",v:"約160万人",y:"2021年",s:"whoDM"}]},
+cancer:{
+ l1:"体の細胞の遺伝子（DNA）に傷がたまり、細胞が止まらずに増え続ける病気。増えた細胞のかたまりがまわりに広がったり、血液に乗って別の場所に移ったり（転移）する。",
+ l2:"細胞が増えるかどうかは、増殖を進める遺伝子（がん遺伝子）と止める遺伝子（がん抑制遺伝子）で調節されている。これらに変異が積み重なると、細胞は増え続け、免疫からも逃れるようになる。どの遺伝子に変異があるかで、効く薬が変わる。",
+ l3:"がんは発生した臓器と遺伝子変化（ドライバー変異）で細かく分けられ、治療は殺細胞性抗がん薬、分子標的薬、免疫チェックポイント阻害薬、抗体薬物複合体、細胞療法を組み合わせる。分子標的薬はコンパニオン診断で対象を選ぶ。",
+ l4:"がんの性質は「がんの特徴（hallmarks of cancer）」として整理されている（増殖シグナルの持続、増殖抑制の回避、細胞死への抵抗、無制限の複製、血管新生、浸潤・転移、代謝の再編、免疫からの回避など）。腫瘍内の不均一性とクローンの進化により、標的治療には耐性が生じやすい。",
+ flow:["DNAに傷がたまる","増殖の信号が\n出続ける","細胞が増え続ける","血管を呼び寄せる","免疫から逃れる"],prob:{},
+ stats:[{l:"国内の総患者数",v:"393.9万人",y:"2023年",s:"kCa"},{l:"国内の死亡数",v:"384,111人",y:"2024年",s:"jinkou"},{l:"死亡率（人口10万対）",v:"319.3",y:"2024年",s:"jinkou"},{l:"世界の新規患者数",v:"約2,000万人",y:"2022年",s:"iarc"},{l:"世界の死亡数",v:"約970万人",y:"2022年",s:"iarc"}]},
+ra:{
+ l1:"自分の免疫が自分の関節を攻撃してしまい、関節が腫れて痛み、進むと骨が壊れて変形する病気。女性に多い。",
+ l2:"関節を包む膜（滑膜）で免疫細胞が増え、炎症を起こすタンパク質（サイトカイン：TNFやIL-6など）を出し続ける。サイトカインが骨を壊す細胞（破骨細胞）を活性化し、関節が壊れる。早く治療を始めると、骨の破壊を防げる。",
+ l3:"関節リウマチは、滑膜に自己免疫性の炎症が続き、軟骨と骨が破壊される疾患。抗CCP抗体（抗シトルリン化タンパク抗体）やリウマトイド因子が陽性になることが多い。TNF・IL-6などのサイトカイン、T細胞の共刺激、JAK–STAT経路、RANKLが治療標的になる。",
+ l4:"HLA-DRB1の共有エピトープと喫煙が主な危険因子で、シトルリン化タンパクに対する自己免疫は発症前から成立している。滑膜線維芽細胞は浸潤性の性質を獲得し、RANKLを発現して破骨細胞の形成を促す。治療は寛解を目標に（treat to target）、メトトレキサートを基本とし、効果が不十分なら生物学的製剤かJAK阻害薬を加える。",
+ flow:["免疫が関節を\n攻撃し始める","T細胞が活性化する","炎症物質（TNF・\nIL-6）が出る","細胞内で\n信号が伝わる","骨が壊れる"],prob:{},
+ stats:[{l:"国内の患者数（推計）",v:"約60〜70万人",y:"有病率0.4〜0.5%",s:"raJP"},{l:"世界の患者数",v:"約1,800万人",y:"2019年",s:"whoRA"},{l:"国内の死亡数",v:"—",y:"死因統計の簡単分類に独立した項目がない",s:"jinkou"}]},
+lipid:{
+ l1:"血液の中のLDLコレステロール（いわゆる悪玉コレステロール）や中性脂肪が多すぎる状態。自覚症状はないが、血管の壁にたまって動脈硬化を進め、心筋梗塞や脳梗塞の原因になる。",
+ l2:"コレステロールは細胞膜やホルモンの材料で、多くは肝臓で作られる。血液中ではLDLという粒子に乗って運ばれ、肝臓のLDL受容体で回収される。回収が足りないとLDLが血管の壁にたまる。",
+ l3:"LDLコレステロールの高値は動脈硬化性心血管疾患の原因となる危険因子。血中LDLの除去は主に肝細胞のLDL受容体が担い、その数はSREBP2による転写とPCSK9による分解で調節される。治療は肝臓のLDL受容体を増やす（スタチン、PCSK9阻害）か、腸からの吸収を減らす（エゼチミブ）。",
+ l4:"家族性高コレステロール血症（LDLR、APOB、PCSK9の変異）は日本で約300人に1人とされる。PCSK9の機能喪失変異をもつ人ではLDLが低く冠動脈疾患が少ないという知見が、PCSK9阻害薬の開発の根拠になった。Lp(a)を標的とするASO・siRNAの臨床試験も進んでいる。",
+ flow:["肝臓で作る・\n腸から吸収する","中性脂肪・LDLが\n血液を流れる","肝臓のLDL受容体が\n回収する","余ったLDLが\n血管壁にたまる","動脈硬化"],prob:{2:"回収が足りない"},
+ stats:[{l:"国内の総患者数",v:"458.7万人",y:"2023年",s:"kLip"},{l:"参考：世界の心血管疾患の死亡数",v:"約1,980万人",y:"2022年",s:"whoCVD"},{l:"国内の死亡数",v:"—",y:"脂質異常症は死因として独立に集計されない",s:"jinkou"}]},
+ad:{
+ l1:"脳の神経細胞が少しずつ減っていき、もの忘れから始まって、判断や日常生活が難しくなる病気。認知症の原因として最も多い。",
+ l2:"脳にアミロイドβというタンパク質がたまり（老人斑）、続いてタウというタンパク質が神経細胞の中で固まる。神経細胞どうしのつながり（シナプス）が失われ、記憶に関わるアセチルコリンという物質も減る。症状が出る10年以上前から脳の変化が始まっている。",
+ l3:"病理学的には、アミロイドβ（Aβ）の細胞外沈着（老人斑）、リン酸化タウの神経原線維変化、神経細胞の脱落が特徴。従来の薬はアセチルコリン系とグルタミン酸系に作用する対症療法で、抗Aβ抗体は早期の患者でAβを除去して進行を緩やかにする。",
+ l4:"Aβ42はAPPのβ・γセクレターゼによる切断で生じ、オリゴマーやプロトフィブリルが神経毒性に関わるとされる（アミロイド仮説）。APOE ε4は最大の遺伝的危険因子。レカネマブの第3相試験では18か月でCDR-SBの悪化が27%抑えられたが、臨床的な意義やアミロイド仮説の位置づけには議論がある。タウを標的とする承認薬はまだない。",
+ flow:["アミロイドβが\nたまる","タウが神経の中で\n固まる","神経細胞と\nシナプスが減る","アセチルコリン\nなどが減る","記憶・判断の障害"],prob:{},
+ stats:[{l:"国内の認知症の高齢者（推計）",v:"約443万人",y:"2022年",s:"dem"},{l:"国内の死亡数（アルツハイマー病）",v:"25,595人",y:"2024年",s:"jinkou"},{l:"死亡率（人口10万対）",v:"21.3",y:"2024年",s:"jinkou"},{l:"世界の認知症の人",v:"約5,700万人",y:"2021年（うちアルツハイマー病が60〜70%）",s:"whoDem"}]},
+sma:{
+ l1:"生まれつきの遺伝子の病気で、筋肉を動かす神経（運動ニューロン）が少しずつ壊れ、筋力が弱くなる。重い型では赤ちゃんのうちに発症する。今は早く治療を始めると、運動の発達を保てるようになった。",
+ l2:"運動ニューロンが生きるにはSMNというタンパク質が必要。SMAの人はSMN1遺伝子が両方とも働かない。よく似たSMN2遺伝子もあるが、ほとんどが途中の部分（エクソン7）の抜けた不完全なタンパク質しか作らない。治療はSMNを増やすこと。",
+ l3:"SMN1の両アレル欠失（約95%）または変異による常染色体潜性遺伝の疾患。SMN2はエクソン7の1塩基の違い（C→T）によりスプライシングでエクソン7が除かれやすく、完全長のSMNは約10%しか作られない。SMN2のコピー数が多いほど軽症になる。",
+ l4:"エクソン7の+6位のC→Tは、スプライシングを促す配列を失わせ、抑える配列を作ってエクソン7の認識を弱める。新生児スクリーニングが広がり、発症前に治療した例の成績が報告されている。治療はSMN2のスプライシングの補正（ヌシネルセン、リスジプラム）とSMN1の補充（オナセムノゲン）に分かれる。",
+ flow:["SMN1遺伝子が\n働かない","SMN2からは不完全な\nSMNが多くできる","SMNタンパク質が\n足りない","運動ニューロンが\n壊れる","筋力が弱くなる"],prob:{0:"原因"},
+ stats:[{l:"有病率",v:"10万人あたり1〜2人",y:"",s:"nanbyo"},{l:"発生率",v:"出生約2万人に1人",y:"",s:"nanbyo"},{l:"国内の死亡数",v:"—",y:"死因統計の「脊髄性筋萎縮症及び関連症候群」（2024年 2,824人）はALSなどを含み、SMA単独の数ではない",s:"jinkou"}]},
+hemo:{
+ l1:"血を固めるためのタンパク質（凝固因子）が生まれつき足りず、血が止まりにくい病気。関節や筋肉の中で出血を繰り返すと、関節が傷む。ほとんどが男性。",
+ l2:"血液が固まるには、十数種類の凝固因子が順番に働く必要がある。第VIII因子が足りないのが血友病A、第IX因子が足りないのが血友病B。どちらの遺伝子もX染色体にあるため、X染色体を1本しかもたない男性に多い。",
+ l3:"第VIII因子（F8）または第IX因子（F9）の欠乏によるX連鎖潜性遺伝の疾患。活性化第IX因子（FIXa）は補因子FVIIIaと複合体（内因系テナーゼ）を作り、第X因子を効率よく活性化する。この増幅段階が働かないため、十分なトロンビンが作られない。重症度は因子活性で分類する（1%未満が重症）。",
+ l4:"重症血友病Aの約半数はF8のイントロン22逆位による。因子補充療法の最大の課題は中和抗体（インヒビター）で、重症Aの約3割に生じるとされる。治療は因子補充から、非因子製剤（エミシズマブ）、凝固を抑える因子の抑制（リバランス療法）、遺伝子治療へと選択肢が広がっている。",
+ flow:["けがで血管が傷つく","凝固因子が\n順に活性化される","第IX因子＋第VIII因子が\n第X因子を活性化","トロンビンができる","フィブリンで\n血が固まる"],prob:{2:"血友病ではここが働かない"},
+ stats:[{l:"国内の血友病A",v:"5,431人",y:"2024年5月31日時点",s:"hemoJP"},{l:"国内の血友病B",v:"1,191人",y:"2024年5月31日時点",s:"hemoJP"},{l:"世界で確認された患者（A＋B）",v:"257,146人",y:"2022年（125か国）",s:"wfh"}]},
+allergy:{
+ l1:"喘息は気道（空気の通り道）に、アトピー性皮膚炎は皮膚に、アレルギー性の炎症が続く病気。喘息では気道が狭くなって息苦しくなり、アトピー性皮膚炎では湿疹とかゆみが続く。",
+ l2:"皮膚や気道の表面のバリアが弱いと、アレルゲンなどの刺激で免疫が反応する。2型炎症と呼ばれるタイプの免疫反応で、IL-4・IL-5・IL-13などのサイトカイン、IgE抗体、好酸球が中心になる。",
+ l3:"共通の病態は2型炎症で、上皮由来のサイトカイン（TSLP、IL-33、IL-25）→Th2細胞・2型自然リンパ球（ILC2）→IL-4/IL-13（IgEへのクラススイッチ、気道過敏性、粘液産生、皮膚バリアの低下）とIL-5（好酸球）という流れ。治療は吸入ステロイド・外用薬を基本に、重症例でサイトカインやIgEを標的とする抗体を使う。",
+ l4:"アトピー性皮膚炎ではフィラグリン遺伝子の機能喪失変異が危険因子。喘息は好酸球性（2型が強い）と非好酸球性に分かれ、血中好酸球数や呼気NO（FeNO）で生物学的製剤を選ぶ。かゆみにはIL-31が関わる。",
+ flow:["バリアの弱い\n皮膚・気道","上皮がTSLPなどを\n出す","Th2細胞・ILC2が\n活性化する","IL-4・IL-5・IL-13、\nIgEが増える","気道が狭くなる・\n湿疹とかゆみ"],prob:{},
+ stats:[{l:"国内の喘息による死亡数",v:"1,088人",y:"2024年",s:"jinkou"},{l:"死亡率（人口10万対）",v:"0.9",y:"2024年",s:"jinkou"},{l:"世界の喘息の患者数",v:"約3.63億人",y:"2023年",s:"whoAs"},{l:"世界の喘息による死亡数",v:"約44.2万人",y:"2023年",s:"whoAs"}]},
+virus:{
+ l1:"ウイルスが体の細胞に入り込み、細胞の仕組みを使って自分のコピーを大量に作る病気。インフルエンザ、新型コロナウイルス感染症、HIV感染症などがある。",
+ l2:"ウイルスは自分だけでは増えられず、細胞の中に入って遺伝子（DNAやRNA）を複製し、タンパク質を作らせる。抗ウイルス薬は、侵入・複製・組み立て・放出のどこかの段階を止める。ウイルスごとに使う酵素が違うので、効く薬も違う。",
+ l3:"ウイルスの生活環（吸着・侵入→脱殻→ゲノム複製→タンパク質の合成と切断→集合→放出）の各段階が標的になる。ヒトにない、またはヒトと大きく異なるウイルスの酵素（逆転写酵素、インテグラーゼ、プロテアーゼ、RNAポリメラーゼ、ノイラミニダーゼ）を選択的に阻害する。予防にはワクチンと中和抗体を使う。",
+ l4:"HIVは作用機序の異なる薬を組み合わせる抗レトロウイルス療法でウイルス量を検出限界未満に抑えられ、その状態では性行為で感染しない（U=U）ことが確立した。RNAウイルスは変異が速く、薬剤耐性変異（インフルエンザのPA I38T、ノイラミニダーゼH275Yなど）の監視が必要。長時間作用型の製剤（カボテグラビル、レナカパビル）で投与間隔が延びている。",
+ flow:["細胞の受容体に\n結合して侵入","遺伝子を放出\n（脱殻）","遺伝子を複製する\n（HIVは組み込み）","ウイルスの\nタンパク質を作る","組み立てて放出"],prob:{},
+ stats:[{l:"国内のHIV新規報告（2024年）",v:"994件",y:"HIV感染者662件・AIDS患者332件",s:"hivJP"},{l:"国内のHIV累計報告",v:"36,375件",y:"2024年末（凝固因子製剤による感染例を除く）",s:"hivJP"},{l:"国内の死亡数：新型コロナ",v:"35,865人",y:"2024年（人口10万対 29.8）",s:"jinkou"},{l:"国内の死亡数：インフルエンザ",v:"2,857人",y:"2024年（人口10万対 2.4）",s:"jinkou"},{l:"世界のHIV陽性者",v:"約4,100万人",y:"2025年末（HIV関連死亡 約57万人）",s:"whoHIV"},{l:"世界の季節性インフルエンザ",v:"年約10億例",y:"呼吸器疾患による死亡 年29万〜65万人",s:"whoFlu"}]}
+};
+for(const k of DISEASE_ORDER){DATA[k].lv=DLV[k];DATA[k].intro=DLV[k].l3;}
+
+// ---------- figure primitives ----------
+function L(t,cx,cy){const ls=String(t).split("\n");const y0=cy-(ls.length-1)*6+3.5;
+  return ls.map((l,i)=>`<text x="${cx}" y="${y0+i*12}" text-anchor="middle">${esc(l)}</text>`).join("");}
+function B(k,x,y,w,h,t){return `<g class="fn" data-k="${k}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5"/>${L(t,x+w/2,y+h/2)}</g>`;}
+function A(x1,y1,x2,y2,d){return `<path class="${d?"fld":"fl"}" d="M${x1} ${y1} L${x2} ${y2}" marker-end="url(#mh)"/>`;}
+function T(x,y,t,c,anc){return `<text class="${c||"tx"}" x="${x}" y="${y}"${anc?` text-anchor="${anc}"`:""}>${esc(t)}</text>`;}
+function C(x,y,w,h,label,fill){return `<rect class="${fill?"fcfill":"fc"}" x="${x}" y="${y}" width="${w}" height="${h}" rx="16"/>`+(label?`<text class="fct" x="${x+12}" y="${y+h-8}">${esc(label)}</text>`:"");}
+const MARK='<defs><marker id="mh" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--muted)"/></marker></defs>';
+let MKN=0;
+function svgWrap(vb,inner,label){const id="mh"+(++MKN);return `<svg viewBox="0 0 ${vb[0]} ${vb[1]}" role="img" aria-label="${esc(label||"")}">${MARK.replace('id="mh"',`id="${id}"`)}${inner.split("url(#mh)").join(`url(#${id})`)}</svg>`;}
+
+// ---------- mechanism figures (disease tabs) ----------
+const FIGS={
+beta:{vb:[340,236],cap:"グルコース代謝でATP/ADP比が上がるとKATPチャネルが閉じ、脱分極とCa²⁺流入でインスリン顆粒が放出される。インクレチン受容体からのcAMPはこの分泌を増強するが、引き金となるCa²⁺シグナルがある高血糖時に主に働く。",
+ draw:()=>C(30,40,272,170,"膵β細胞")+T(4,52,"グルコース")
+  +B("glut2",12,58,50,22,"GLUT2")+B("mito",78,52,92,34,"ミトコンドリア\nATP/ADP比↑")+B("katp",190,58,96,22,"KATP閉鎖")
+  +B("ca",184,102,108,22,"脱分極・Ca²⁺流入")+B("gran",78,102,92,22,"インスリン顆粒")
+  +B("camp",180,146,80,22,"cAMP↑")+B("rec",276,140,60,34,"GLP-1R\nGIPR")
+  +B("dpp4",92,6,64,22,"DPP-4")+B("inc",200,6,84,22,"GLP-1・GIP")+T(160,34,"分解")
+  +A(62,69,78,69)+A(170,69,190,69)+A(238,80,238,102)+A(184,113,170,113)+A(284,28,306,140)+A(200,17,156,17,1)
+  +A(276,157,260,157)+A(180,157,150,124,1)+A(124,124,124,222)+T(132,226,"インスリン分泌","txi"),
+ map:{su:["katp"],glinide:["katp"],dpp4:["dpp4"],glp1:["rec","camp"],tirz:["rec","camp"],imeg:["mito","gran"]}},
+target:{vb:[340,244],cap:"インスリン受容体からIRS–PI3K–AKT経路を経てGLUT4が細胞膜へ移行し、筋・脂肪の糖取り込みが増える。肝臓では糖新生が抑えられる。メトホルミンは主に肝臓の糖新生を抑え、TZDは核内受容体PPARγを介して感受性を上げる。",
+ draw:()=>C(30,40,282,196,"筋・脂肪・肝細胞")+B("ins",40,4,80,22,"インスリン")+A(80,26,80,30)
+  +B("ir",40,30,104,22,"インスリン受容体")+B("irs",40,72,104,22,"IRS→PI3K→AKT")+B("glut4",40,114,104,22,"GLUT4 膜移行")
+  +B("upt",40,150,104,34,"糖取り込み↑\n（筋・脂肪）")+B("ppar",186,196,110,22,"PPARγ（核内）")
+  +B("mito",186,56,110,34,"ミトコンドリア\n呼吸鎖 複合体I")+B("ampk",186,108,110,22,"AMPK活性化")+B("gng",186,146,110,34,"糖新生↓\n（肝）")
+  +A(92,52,92,72)+A(92,94,92,114)+A(92,136,92,150)+A(144,86,186,158,1)+A(241,90,241,108)+A(241,130,241,146)+A(186,205,144,178,1),
+ map:{insulin:["ins","ir","irs","glut4","upt","gng"],met:["mito","ampk","gng"],tzd:["ppar","upt"],imeg:["mito","gng","upt"]}},
+kidney:{vb:[340,196],cap:"糸球体でろ過されたグルコースの大部分は、近位尿細管のS1セグメントにあるSGLT2でNa⁺と一緒に再吸収され、基底膜側のGLUT2から血液に戻る。SGLT2を阻害すると再吸収されなかった分が尿に出る。",
+ draw:()=>T(8,22,"尿細管腔（原尿）")+T(124,22,"近位尿細管細胞")+T(262,22,"血液")
+  +`<rect class="fcfill" x="110" y="32" width="120" height="150" rx="10"/>`
+  +B("sglt2",86,60,48,24,"SGLT2")+B("glut2",206,60,48,24,"GLUT2")+T(10,54,"Glc + Na⁺")
+  +A(20,72,86,72)+A(134,72,206,72)+A(254,72,322,72)
+  +B("urine",10,140,84,34,"尿糖排泄↑")+A(50,90,50,140,1)+T(120,120,"ろ過された糖の大半を","txi")+T(120,134,"ここで再吸収","txi"),
+ map:{sglt2:["sglt2","urine"]}},
+gut:{vb:[340,150],cap:"二糖類は小腸刷子縁膜のα-グルコシダーゼで単糖に分解されてから吸収される。阻害すると分解が遅れ、糖の吸収が小腸の下部へずれて食後の血糖上昇がなだらかになる。",
+ draw:()=>T(8,20,"小腸の内腔")+B("di",8,34,78,34,"二糖類\n（ショ糖など）")+B("agl",104,34,112,34,"α-グルコシダーゼ\n（刷子縁膜）")
+  +B("mono",234,34,98,34,"単糖\n（ブドウ糖など）")+A(86,51,104,51)+A(216,51,234,51)+A(283,68,283,96)
+  +B("abs",226,96,106,34,"吸収\n→ 食後血糖↑")+T(10,104,"阻害すると分解が遅れ、","txi")+T(10,118,"吸収が小腸下部へずれる","txi"),
+ map:{agi:["agl","abs"]}},
+signal:{vb:[340,250],cap:"受容体型チロシンキナーゼ（EGFR・HER2）からRAS–RAF–MEK–ERK経路とPI3K–AKT–mTOR経路を経て、増殖・生存の遺伝子が転写される。BCR-ABLは受容体を介さず恒常的に下流を活性化する。",
+ draw:()=>C(10,44,320,198,"")+T(250,236,"がん細胞","fct")
+  +B("egfr",30,32,70,24,"EGFR")+B("her2",112,32,70,24,"HER2")
+  +B("ras",30,84,70,22,"KRAS")+B("raf",30,120,70,22,"BRAF")+B("mek",30,156,70,22,"MEK")+B("erk",30,192,70,22,"ERK")
+  +B("pi3k",120,84,70,22,"PI3K")+B("akt",120,120,70,22,"AKT")+B("mtor",120,156,70,22,"mTORC1")
+  +B("bcr",224,78,96,34,"BCR-ABL\n（融合キナーゼ）")+B("nuc",212,164,108,44,"核\n増殖・生存の転写")
+  +A(65,56,65,84)+A(147,56,155,84)+A(88,56,128,84,1)+A(122,56,92,84,1)
+  +A(65,106,65,120)+A(65,142,65,156)+A(65,178,65,192)+A(100,203,212,190)+A(155,106,155,120)+A(155,142,155,156)+A(190,167,212,176)+A(272,112,272,164),
+ map:{egfr:["egfr"],her2:["her2"],kras:["ras"],braf:["raf","mek"],pi3k:["pi3k","mtor"],bcrabl:["bcr"]}},
+dna:{vb:[340,272],cap:"DNA合成・複製を止める薬（代謝拮抗薬、アルキル化薬、白金製剤）と、DNA切断を修復させない薬（トポイソメラーゼ阻害薬、PARP阻害薬）がある。損傷が修復しきれないと細胞死に至る。",
+ draw:()=>B("nuc",14,10,144,34,"ヌクレオチド合成\nTS・DHFR・RNR")+B("rep",182,10,144,34,"DNA複製\n（S期）")
+  +B("add",14,80,144,34,"塩基修飾・架橋\n（DNA付加体）")+B("topo",182,80,144,34,"トポイソメラーゼ\n切断 → 再結合")
+  +B("ssb",14,150,144,34,"一本鎖切断\nPARPが修復")+B("dsb",182,150,144,34,"二本鎖切断\n相同組換え（BRCA）で修復")
+  +B("death",100,228,140,34,"修復できない\n→ 細胞死")
+  +A(158,27,182,27)+A(158,92,182,42)+T(160,70,"複製停止")+A(254,114,254,150)+A(158,167,182,167)+T(150,146,"複製時")
+  +A(254,184,214,228)+A(86,184,126,228,1),
+ map:{alk:["add","rep"],pt:["add","rep"],anti:["nuc","rep"],topo:["topo","dsb"],parp:["ssb","dsb","death"]}},
+cycle:{vb:[340,210],cap:"サイクリンD–CDK4/6がRbをリン酸化するとE2Fが放出され、細胞はG1期からS期へ進む。M期には紡錘体微小管が染色体を分配する。CDK4/6阻害薬はG1期で、微小管阻害薬はM期で細胞周期を止める。",
+ draw:()=>B("g1",18,90,46,26,"G1")+B("s",90,20,46,26,"S")+B("g2",160,90,46,26,"G2")+B("m",90,162,46,26,"M")
+  +A(48,90,92,46)+A(134,46,176,90)+A(176,116,134,164)+A(92,164,48,116)
+  +B("cdk",218,12,118,34,"サイクリンD–CDK4/6\nRbをリン酸化")+B("e2f",218,60,118,34,"E2F放出\n→ S期へ進む")+A(277,46,277,60)
+  +B("spd",218,150,118,34,"紡錘体微小管\n染色体を分配")+A(218,29,66,92,1)+A(218,167,138,174,1),
+ map:{cdk:["cdk","e2f","g1"],mt:["spd","m"]}},
+immune:{vb:[340,250],cap:"T細胞は通常、TCRでMHC上の抗原を認識する。PD-1/PD-L1はそのブレーキ。二重特異性抗体はCD3とがん抗原を、CAR-TはCARで抗原を直接つなぎ、MHCに依存せずT細胞を働かせる。CTLA-4は主にリンパ節でのプライミングを抑える。",
+ draw:()=>B("dc",10,6,72,30,"樹状細胞\nB7")+B("ctla",98,6,122,30,"CTLA-4 / CD28")+T(228,18,"リンパ節での")+T(228,31,"プライミング")+A(82,21,98,21)+A(130,36,90,54)
+  +C(10,48,112,196,"T細胞",1)+C(218,48,112,196,"がん細胞",1)
+  +B("tcr",88,70,56,22,"TCR")+B("mhc",196,70,56,22,"MHC")+`<path class="fl" d="M144 81 L196 81"/>`
+  +B("pd1",88,110,56,22,"PD-1")+B("pdl1",196,110,56,22,"PD-L1")+`<path class="fl" d="M144 121 L196 121 M150 115 L150 127"/>`+T(156,108,"抑制")
+  +B("cd3",88,150,56,22,"CD3")+B("bsab",150,150,40,22,"bsAb")+B("ag1",196,150,56,22,"抗原")+`<path class="fl" d="M144 161 L150 161 M190 161 L196 161"/>`
+  +B("car",88,190,56,22,"CAR")+B("ag2",196,190,56,22,"抗原")+`<path class="fl" d="M144 201 L196 201"/>`,
+ map:{pd1:["pd1","pdl1"],ctla4:["ctla","dc"],bite:["bsab","cd3","ag1"],cart:["car","ag2"]}},
+adc:{vb:[340,262],cap:"ADCは抗原に結合して細胞内に取り込まれ、リソソームでリンカーが切れてペイロードを放出する。膜透過性のペイロード（DXdなど）は隣接する細胞にも作用する（バイスタンダー効果）。",
+ draw:()=>`<g transform="translate(80,4) scale(0.52)">${igg({pay:true})}</g>`+T(130,20,"抗体＋リンカー＋ペイロード","txi")
+  +C(10,52,320,202,"がん細胞")+B("ag",48,42,64,22,"抗原")
+  +B("s2",24,80,136,28,"① エンドサイトーシス")+B("s3",24,126,136,34,"② リソソームで\nリンカー切断")+B("s4",186,126,136,34,"③ ペイロード放出")
+  +B("s5",186,190,136,34,"④ DNA損傷・\n微小管阻害")+B("s6",24,190,136,34,"⑤ 膜透過性なら\n隣接細胞へ")
+  +A(80,64,80,80)+A(92,108,92,126)+A(160,143,186,143)+A(254,160,254,190)+A(200,160,140,190,1),
+ map:{adc:["ag","s2","s3","s4","s5","s6"]}},
+vegf:{vb:[340,196],cap:"低酸素のがん細胞が分泌するVEGF-Aが血管内皮のVEGFR2に結合し、チロシンキナーゼを介して血管新生を起こす。抗体はリガンドか受容体に結合し、低分子TKIは細胞内のキナーゼを阻害する。",
+ draw:()=>B("tum",8,30,92,40,"がん細胞\n（低酸素）")+B("vegf",110,38,60,24,"VEGF-A")+C(200,14,134,176,"血管内皮細胞",1)
+  +B("vr",184,38,70,24,"VEGFR2")+B("kin",218,84,108,34,"チロシン\nキナーゼ")+B("ang",218,138,108,34,"増殖・遊走\n→ 血管新生")
+  +A(100,50,110,50)+A(170,50,184,50)+A(236,62,256,84)+A(272,118,272,138)
+  +T(8,104,"抗体：VEGF-A、VEGFR2に結合","txi")+T(8,120,"低分子TKI：キナーゼを阻害","txi"),
+ map:{vegf:["vegf","vr","kin"]}}
+};
+const CLASS_FIG={insulin:"target",su:"beta",glinide:"beta",dpp4:"beta",glp1:"beta",tirz:"beta",met:"target",tzd:"target",agi:"gut",sglt2:"kidney",imeg:"beta",
+ alk:"dna",pt:"dna",anti:"dna",topo:"dna",parp:"dna",egfr:"signal",her2:"signal",kras:"signal",braf:"signal",pi3k:"signal",bcrabl:"signal",
+ cdk:"cycle",mt:"cycle",adc:"adc",vegf:"vegf",pd1:"immune",ctla4:"immune",cart:"immune",bite:"immune"};
+
+// IgG drawn with hinge at (0,0); used at different scales
+function igg(o={}){
+  const armR=o.altR?"alt":"hc", lightR=o.altR?"alt":"lc";
+  let s=`<rect class="hc" x="-13" y="4" width="12" height="62" rx="4"/><rect class="hc" x="1" y="4" width="12" height="62" rx="4"/>`;
+  s+=`<g transform="rotate(-36)"><rect class="hc" x="-13" y="-62" width="12" height="60" rx="4"/><rect class="lc" x="-27" y="-58" width="11" height="48" rx="4"/><rect class="cdr" x="-27" y="-67" width="26" height="6" rx="2"/></g>`;
+  s+=`<g transform="rotate(36)"><rect class="${armR}" x="1" y="-62" width="12" height="60" rx="4"/><rect class="${lightR}" x="16" y="-58" width="11" height="48" rx="4"/><rect class="cdr" x="1" y="-67" width="26" height="6" rx="2"/></g>`;
+  if(o.pay){for(const [x,y] of [[-40,-20],[40,-20],[-19,30],[19,30]]) s+=`<path class="strk" d="M${x>0?x-8:x+8} ${y} L${x} ${y}"/><circle class="pay" cx="${x}" cy="${y}" r="5"/>`;}
+  return s;
+}
+
+// ---------- modality figures ----------
+function beads(n,x0,y,dx,hits,r){let s="";for(let i=1;i<=n;i++){s+=`<circle class="bead${hits&&hits.includes(i)?" hit":""}" cx="${x0+(i-1)*dx}" cy="${y}" r="${r||4.5}"/>`;}return s;}
+const BLOB='<path class="blob" d="M30 110 Q16 52 86 36 Q156 20 196 52 Q232 84 204 122 Q166 156 104 150 Q44 150 30 110 Z"/><path class="hole" d="M166 46 Q196 56 194 84 Q176 96 160 80 Q150 60 166 46 Z"/>';
+function hexa(cx,cy,r,c){let p=[];for(let i=0;i<6;i++){const a=Math.PI/3*i+Math.PI/6;p.push((cx+r*Math.cos(a)).toFixed(1)+" "+(cy+r*Math.sin(a)).toFixed(1));}return `<path class="${c||"strk2"}" d="M${p.join(" L")} Z"/>`;}
+const MFIG={
+sm:()=>BLOB+hexa(176,70,10)+`<path class="strk2" d="M185 75 L196 82"/>`+T(56,96,"標的タンパク質","txi")+T(216,40,"結合ポケット")+A(214,44,192,58)+T(214,120,"低分子（約500 Da以下）","txb")+A(214,110,186,82),
+cov:()=>BLOB+hexa(176,70,10)+`<path class="strk3" d="M182 80 L186 94"/>`+`<circle class="pay" cx="187" cy="98" r="5"/>`+T(204,104,"Cys（共有結合）","txi")+T(214,40,"弾頭（アクリルアミドなど）")+A(212,44,186,70)+T(40,96,"標的タンパク質","txi"),
+deg:()=>`<circle class="blob" cx="66" cy="86" r="40"/><circle class="blob" cx="204" cy="86" r="46"/>`+hexa(118,86,9)+`<path class="strk2" d="M127 86 L144 86"/>`+hexa(153,86,9,"strk4")
+  +T(66,90,"標的","txb","middle")+T(204,90,"E3リガーゼ","txb","middle")+T(204,104,"CRBN・VHL など","tx","middle")
+  +`<circle class="pay" cx="38" cy="50" r="5"/><circle class="pay" cx="30" cy="40" r="5"/><circle class="pay" cx="22" cy="30" r="5"/>`+T(30,20,"ユビキチン鎖")
+  +A(258,86,280,86)+`<rect class="fcfill" x="282" y="64" width="34" height="44" rx="6"/>`+T(299,124,"プロテアソーム","tx","middle")+T(299,138,"で分解","tx","middle")
+  +T(135,150,"PROTAC：標的リガンド–リンカー–E3リガンド","txi","middle"),
+pep:()=>beads(20,22,70,14,[2,13])+`<path class="strk3" d="M288 74 L292 96 L300 104 L296 118 L304 126 L300 140"/>`
+  +`<ellipse class="blob" cx="250" cy="146" rx="56" ry="20"/>`+T(250,150,"アルブミン","txi","middle")
+  +T(36,52,"Aib（2）","txi","middle")+T(190,52,"Aib（13）","txi","middle")+T(288,52,"K20","txi","middle")+T(286,104,"C20脂肪二酸","tx","end")
+  +T(20,100,"チルゼパチド（39残基）のN末端側20残基を表示","tx")+T(20,116,"青：非天然アミノ酸Aibに置換した位置","tx"),
+cyc:()=>{let s="";const cx=110,cy=86,r=56,nm=[1,3,4,6,9,10,11];for(let i=1;i<=11;i++){const a=-Math.PI/2+(i-1)*2*Math.PI/11;s+=`<circle class="bead${nm.includes(i)?" hit":""}" cx="${(cx+r*Math.cos(a)).toFixed(1)}" cy="${(cy+r*Math.sin(a)).toFixed(1)}" r="9"/>`;}
+  return `<circle class="fc" cx="${cx}" cy="${cy}" r="56"/>`+s+T(110,90,"シクロスポリン","txb","middle")+T(190,60,"11残基の環状ペプチド","txi")+T(190,78,"青：N-メチル化アミノ酸","tx")+T(190,94,"（11残基中7残基）","tx")+T(190,118,"環化とN-メチル化で","tx")+T(190,132,"分解耐性と膜透過性","tx");},
+insulin:()=>beads(21,20,56,13.5,[21])+beads(30,20,118,9.6,[28,29,30])
+  +`<path class="strk3" d="M${20+5*13.5} 56 Q${20+7.5*13.5} 36 ${20+10*13.5} 56"/>`
+  +`<path class="strk3" d="M${20+6*13.5} 60 L${20+6*9.6} 114"/><path class="strk3" d="M${20+19*13.5} 60 L${20+18*9.6} 114"/>`
+  +T(4,30,"A鎖（21残基）","txi")+T(4,146,"B鎖（30残基）","txi")+T(300,48,"A21","txi","middle")+T(298,140,"B28–B30","txi","middle")
+  +T(140,30,"オレンジ：ジスルフィド結合","tx"),
+fcfus:()=>`<g transform="translate(110,92)"><rect class="hc" x="-13" y="4" width="12" height="62" rx="4"/><rect class="hc" x="1" y="4" width="12" height="62" rx="4"/>`
+  +`<g transform="rotate(-30)"><ellipse class="alt" cx="-7" cy="-20" rx="10" ry="17"/><ellipse class="lc" cx="-7" cy="-54" rx="10" ry="17"/></g><g transform="rotate(30)"><ellipse class="alt" cx="7" cy="-20" rx="10" ry="17"/><ellipse class="lc" cx="7" cy="-54" rx="10" ry="17"/></g></g>`
+  +T(170,46,"受容体の細胞外ドメイン","txi")+T(170,60,"（リガンドを捕捉するおとり）","tx")+T(170,128,"IgG1 Fc","txi")+T(170,142,"FcRnで再利用→半減期延長","tx")+A(168,124,126,130),
+igg:()=>`<g transform="translate(96,96)">${igg()}</g>`+T(30,22,"Fab（抗原結合）","txi")+T(150,18,"CDR（青）","txi")+A(150,22,132,34)
+  +T(126,150,"Fc","txb")+T(150,112,"重鎖×2（濃）","txi")+T(150,126,"軽鎖×2（淡）","txi")+T(150,150,"FcγR・FcRn・補体が結合","tx")+T(150,166,"IgG 約150 kDa","tx"),
+fceng:()=>`<g transform="translate(86,90)">${igg()}<circle class="pay" cx="-7" cy="44" r="5"/><circle class="pay" cx="7" cy="44" r="5"/><circle cx="0" cy="12" r="5" class="alt"/><circle cx="-7" cy="26" r="4" fill="var(--ev-est)"/></g>`
+  +T(152,28,"S228P（IgG4ヒンジ安定化）","txi")+A(150,30,92,100,1)
+  +T(152,60,"LALA・N297A：エフェクター除去","txi")+T(152,74,"低フコース化：ADCC増強","txi")+A(150,70,84,114,1)
+  +T(152,134,"YTE・LS：FcRn結合（pH 6）↑","txi")+T(152,148,"→ 半減期延長","tx")+A(150,136,98,134,1)
+  +T(10,176,"番号はEU番号。CH2–CH3境界にFcRn結合部位がある","tx"),
+adcm:()=>`<g transform="translate(96,96)">${igg({pay:true})}</g>`+T(160,40,"抗体：抗原を選ぶ","txi")+T(160,64,"リンカー：血中で安定、","txi")+T(160,78,"細胞内で切断","txi")
+  +T(160,102,"ペイロード（オレンジ）：","txi")+T(160,116,"MMAE・DXd・DM1 など","txi")+T(160,140,"DAR：1抗体あたりの薬物数","txi"),
+bsab:()=>`<g transform="translate(78,98)">${igg({altR:true})}<rect x="-13" y="44" width="12" height="8" fill="var(--ev-est)"/><rect x="1" y="44" width="12" height="8" fill="var(--card)" stroke="var(--ev-est)"/></g>`
+  +T(18,174,"IgG型（knobs-into-holes）","txi")
+  +`<rect class="cdr" x="196" y="78" width="22" height="18" rx="3"/><rect class="lc" x="220" y="78" width="22" height="18" rx="3"/><path class="strk" d="M242 87 L254 87"/><rect class="alt" x="254" y="78" width="22" height="18" rx="3"/><rect class="lc" x="278" y="78" width="22" height="18" rx="3"/>`
+  +T(219,70,"抗がん抗原","tx","middle")+T(277,70,"抗CD3","tx","middle")+T(248,122,"BiTE（scFv×2、約55 kDa）","txi","middle")+T(248,138,"Fcなし→半減期が短い","tx","middle"),
+frag:()=>`<g transform="translate(56,98) scale(0.8)">${igg()}</g>`+T(30,170,"IgG 150 kDa","tx")+A(104,96,136,96)
+  +`<g transform="translate(170,104)"><rect class="hc" x="-6" y="-60" width="12" height="60" rx="4"/><rect class="lc" x="9" y="-56" width="11" height="48" rx="4"/><rect class="cdr" x="-6" y="-66" width="26" height="6" rx="2"/></g>`
+  +T(150,130,"Fab 約50 kDa","txi")+`<rect class="hc" x="262" y="70" width="14" height="34" rx="4"/><rect class="cdr" x="262" y="64" width="14" height="6" rx="2"/>`+T(244,130,"VHH 約15 kDa","txi"),
+na:()=>`<path class="strk2" d="M16 40 L130 40"/>`+T(16,28,"ASO（一本鎖）","txi")
+  +`<path class="strk2" d="M180 34 L300 34"/><path class="strk3" d="M184 46 L304 46"/>`+T(180,22,"siRNA（二本鎖 約21 bp）","txi")
+  +`<path class="strk4" d="M30 150 L30 104 Q30 84 50 84 Q70 84 70 104 L70 150"/>`+[110,122,134].map(y=>`<path class="strk" d="M30 ${y} L70 ${y}"/>`).join("")+T(90,120,"アプタマー","txi")+T(90,134,"（立体構造で結合）","tx")
+  +`<circle class="pay" cx="190" cy="120" r="6"/><path class="strk2" d="M196 120 Q220 104 244 120 T292 120"/>`+T(296,124,"AAAA","tx")+T(180,96,"mRNA（数千塩基）","txi"),
+aso:()=>`<path class="strk" d="M10 104 L330 104"/>`+T(10,124,"標的RNA（mRNA・pre-mRNA）","txi")
+  +`<rect class="alt" x="60" y="80" width="60" height="12" rx="3"/><rect class="cdr" x="120" y="80" width="80" height="12" rx="3"/><rect class="alt" x="200" y="80" width="60" height="12" rx="3"/>`
+  +[...Array(20)].map((_,i)=>`<path class="strk" d="M${66+i*10} 92 L${66+i*10} 104" stroke-width="0.8"/>`).join("")
+  +T(90,72,"ウィング","tx","middle")+T(160,72,"ギャップ（DNA）","tx","middle")+T(230,72,"ウィング","tx","middle")
+  +`<ellipse class="blob" cx="292" cy="40" rx="30" ry="16"/>`+T(292,44,"RNase H","tx","middle")+A(270,52,204,80)
+  +T(10,152,"ウィング：2'-MOE・LNAなどで修飾／RNase HがRNA鎖を切断","tx"),
+sirna:()=>`<path class="strk2" d="M14 40 L104 40"/><path class="strk3" d="M18 52 L108 52"/>`+T(14,26,"siRNA","txi")+A(116,46,146,46)
+  +`<ellipse class="blob" cx="210" cy="46" rx="56" ry="26"/><path class="strk2" d="M174 48 L244 48"/>`+T(210,36,"RISC（Ago2）","txi","middle")
+  +T(18,74,"パッセンジャー鎖は除かれる","tx")+A(210,72,210,98)
+  +`<path class="strk" d="M60 112 L196 112"/><path class="strk" d="M224 112 L330 112"/><path class="strk2" d="M170 104 L240 104"/>`
+  +`<path class="strk3" d="M206 96 L214 120 M214 96 L206 120"/>`+T(60,136,"相補的なmRNAを切断（RISCは再利用される）","txi"),
+mrna:()=>`<circle class="pay" cx="24" cy="40" r="8"/>`+T(24,24,"Cap","tx","middle")
+  +`<rect class="lc" x="34" y="32" width="40" height="16" rx="3"/><rect class="cdr" x="76" y="32" width="150" height="16" rx="3"/><rect class="lc" x="228" y="32" width="40" height="16" rx="3"/>`
+  +T(54,62,"5'UTR","tx","middle")+T(151,62,"コード領域（ORF）","tx","middle")+T(248,62,"3'UTR","tx","middle")+T(274,44,"AAAA…","txi")
+  +`<circle class="blob" cx="60" cy="124" r="34"/><path class="strk2" d="M40 124 Q50 108 60 124 T80 124"/>`+T(60,172,"LNPに封入","tx","middle")
+  +A(98,124,138,124)+`<ellipse class="blob" cx="180" cy="124" rx="34" ry="20"/>`+T(180,128,"リボソーム","txi","middle")+A(216,124,250,124)+T(256,128,"タンパク質","txb")
+  +T(130,158,"細胞質で翻訳・核には入らない","tx"),
+apt:()=>`<path class="strk4" d="M70 160 L70 92 Q70 64 96 64 Q122 64 122 92 L122 160"/>`+[100,116,132,148].map(y=>`<path class="strk" d="M70 ${y} L122 ${y}"/>`).join("")
+  +`<path class="strk3" d="M70 160 L58 172"/>`+T(18,178,"PEG（半減期延長）","tx")
+  +`<path class="blob" d="M150 40 Q220 20 260 60 Q290 100 250 130 Q200 150 170 120 Q140 90 150 40 Z"/>`+T(214,92,"標的タンパク質","txi","middle")
+  +A(124,74,156,74)+T(20,40,"一本鎖DNA/RNAが","txi")+T(20,54,"折りたたまれて結合","txi"),
+cartm:()=>`<rect class="fcfill" x="0" y="96" width="340" height="16"/>`+T(250,108,"T細胞膜","tx")
+  +`<rect class="cdr" x="112" y="16" width="22" height="26" rx="5"/><rect class="lc" x="136" y="16" width="22" height="26" rx="5"/>`+`<path class="strk" d="M135 42 L135 96"/>`
+  +`<rect class="hc" x="129" y="96" width="12" height="16"/><rect class="alt" x="120" y="118" width="30" height="20" rx="4"/><rect class="pay" x="120" y="142" width="30" height="28" rx="4"/>`
+  +T(166,32,"scFv（抗原認識）","txi")+T(166,70,"ヒンジ","txi")+T(166,108,"膜貫通部","txi")+T(166,132,"共刺激（CD28／4-1BB）","txi")+T(166,160,"CD3ζ（活性化シグナル）","txi"),
+virus:()=>hexa(80,90,52,"strk")+`<path class="strk3" d="M58 80 Q80 60 100 84 Q82 108 62 100"/>`+T(80,160,"ウイルス粒子","txi","middle")
+  +T(160,40,"カプシド（＋エンベロープ）が","txi")+T(160,54,"遺伝子を細胞に運ぶ","txi")+T(160,86,"腫瘍溶解性：がん細胞で増殖","tx")+T(160,102,"ベクター：増殖能を除き","tx")+T(160,116,"治療遺伝子を搭載","tx"),
+onco:()=>`<circle class="blob" cx="64" cy="84" r="40"/>`+[0,1,2,3,4].map(i=>hexa(48+i%3*16,70+Math.floor(i/3)*24,6,"strk3")).join("")+T(64,144,"がん細胞内で増殖","tx","middle")
+  +A(110,84,150,84)+`<path class="blob" d="M160 60 L176 52 L196 64 L188 84 L204 100 L180 112 L166 100 L152 108 L156 84 Z"/>`+T(180,140,"溶解","txi","middle")
+  +A(212,84,244,84)+T(250,72,"ウイルス放出","tx")+T(250,88,"＋腫瘍抗原の放出","tx")+T(250,104,"→ 抗腫瘍免疫","txb"),
+aav:()=>hexa(60,70,40,"strk")+`<path class="strk3" d="M44 60 Q60 44 76 66 Q58 86 46 74"/>`+T(60,128,"AAV 約25 nm","tx","middle")
+  +`<rect class="lc" x="120" y="60" width="18" height="20"/><rect class="hc" x="140" y="60" width="44" height="20"/><rect class="cdr" x="186" y="60" width="90" height="20"/><rect class="pay" x="278" y="60" width="24" height="20"/><rect class="lc" x="304" y="60" width="18" height="20"/>`
+  +T(129,96,"ITR","tx","middle")+T(162,110,"プロモーター","tx","middle")+T(231,96,"治療遺伝子","tx","middle")+T(290,110,"pA","tx","middle")+T(313,96,"ITR","tx","middle")
+  +T(120,46,"搭載できるのは約4.7 kbまで","txi")+T(120,140,"核内でエピソームとして発現","tx"),
+lenti:()=>`<circle class="blob" cx="60" cy="80" r="40"/><path class="strk3" d="M42 72 Q60 56 78 76 Q60 96 44 86"/>`+T(60,140,"レンチウイルス","tx","middle")
+  +A(110,80,150,80)+`<path class="strk" d="M160 70 L330 70"/><path class="strk" d="M160 90 L330 90"/><rect class="cdr" x="220" y="66" width="60" height="28" rx="3"/>`
+  +T(250,84,"導入遺伝子","txi","middle")+T(160,120,"宿主ゲノムに組み込まれ、","txi")+T(160,134,"分裂後の細胞にも引き継がれる","txi"),
+edit:()=>`<path class="strk" d="M20 60 L320 60"/><path class="strk" d="M20 74 L320 74"/><circle class="blob" cx="170" cy="66" r="30"/><path class="strk2" d="M146 50 L196 50"/>`
+  +T(170,24,"Cas9＋ガイドRNA","txi","middle")+`<path class="strk3" d="M166 54 L174 82 M174 54 L166 82"/>`
+  +[["造血幹細胞\nを採取",14],["体外で\nゲノム編集",126],["前処置後に\n体内へ戻す",238]].map(([t,x],i)=>`<rect class="fcfill" x="${x}" y="114" width="80" height="40" rx="6"/>`+L(t,x+40,134).replace(/<text /g,'<text class="txi" ')+(i<2?A(x+80,134,x+112,134):"")).join("")
+  +T(20,176,"ex vivo：細胞を体外で編集して戻す","tx"),
+radio:()=>hexa(70,80,12)+`<path class="strk2" d="M82 80 L110 80"/><circle class="pay" cx="122" cy="80" r="12"/>`+T(122,84,"Lu","txb","middle")
+  +T(40,118,"標的リガンド","tx")+T(104,118,"キレーター＋核種","tx")
+  +`<path class="strk3" d="M140 70 Q160 60 170 80 Q180 100 200 90"/>`+T(206,70,"β線・α線で","txi")+T(206,84,"近くの細胞のDNAを損傷","txi")
+  +T(206,112,"γ線・PETで集積を","tx")+T(206,126,"画像化できる核種もある","tx"),
+vaccine:()=>[["不活化",44],["組換え\nタンパク",128],["生ワクチン",212],["mRNA・\nベクター",296]].map(([t,x])=>`<rect class="fcfill" x="${x-38}" y="40" width="76" height="40" rx="6"/>`+L(t,x,60).replace(/<text /g,'<text class="txi" ')).join("")
+  +A(170,86,170,116)+`<rect class="fcfill" x="90" y="118" width="160" height="40" rx="6"/>`+L("抗原提示 → 抗体・T細胞\n免疫記憶",170,138).replace(/<text /g,'<text class="txi" '),
+micro:()=>[[60,60],[90,90],[50,110],[120,60],[140,104]].map(([x,y])=>`<ellipse class="blob" cx="${x}" cy="${y}" rx="14" ry="8"/>`).join("")
+  +T(40,150,"生きた細菌の集団","tx")+A(170,84,206,84)+T(214,70,"腸内細菌叢を回復し、","txi")+T(214,84,"病原菌（C. difficile）の","txi")+T(214,98,"再増殖を抑える","txi"),
+msc:()=>`<circle class="blob" cx="70" cy="80" r="36"/><circle class="hole" cx="70" cy="80" r="12"/>`+T(70,136,"間葉系幹細胞","tx","middle")
+  +A(112,80,150,80)+T(158,66,"免疫調節因子を分泌し、","txi")+T(158,80,"過剰な免疫反応を抑える","txi")+T(158,108,"（他家細胞で製造できる）","tx")
+};
+
+// ---------- mechanism figures for added diseases ----------
+function INH(x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy),nx=-dy/len*6,ny=dx/len*6;return `<path class="fl" d="M${x1} ${y1} L${x2} ${y2} M${x2+nx} ${y2+ny} L${x2-nx} ${y2-ny}"/>`;}
+Object.assign(FIGS,{
+ra:{vb:[340,252],cap:"抗原提示細胞からの共刺激（CD80/86→CD28）でT細胞が活性化し、マクロファージなどがTNFやIL-6を作る。サイトカインは受容体からJAK–STATを介して炎症遺伝子を発現させる。滑膜線維芽細胞のRANKLが破骨細胞を活性化し、骨が壊れる。",
+ draw:()=>B("apc",8,10,100,34,"抗原提示細胞\nCD80/86")+B("cd28",124,16,56,22,"CD28")+B("tcell",198,10,134,34,"T細胞の活性化")
+  +A(108,27,124,27)+A(180,27,198,27)+B("mac",198,64,134,34,"マクロファージ")+A(265,44,265,64)
+  +B("tnf",198,116,62,22,"TNF")+B("il6",270,116,62,22,"IL-6")+A(232,98,229,116)+A(298,98,301,116)
+  +B("rec",8,116,134,22,"サイトカイン受容体")+A(198,127,142,127)+B("jak",8,154,134,22,"JAK → STAT")+A(75,138,75,154)
+  +B("gene",8,192,134,22,"炎症遺伝子の転写")+A(75,176,75,192)
+  +B("fib",198,160,134,34,"滑膜線維芽細胞\nRANKLを発現")+A(301,138,290,160)+A(229,138,240,160,1)
+  +B("ocl",198,212,66,34,"破骨細胞")+B("bone",274,212,58,34,"骨びらん")+A(231,194,231,212)+A(264,229,274,229),
+ map:{mtx:["tcell","mac"],tnf:["tnf"],il6:["il6"],abat:["apc","cd28"],jak:["jak"],rankl:["ocl","fib"]}},
+lipid:{vb:[340,244],cap:"肝細胞ではHMG-CoA還元酵素の経路でコレステロールが作られる。細胞内のコレステロールが減るとSREBP2がLDL受容体の発現を増やし、血中のLDLを取り込む。PCSK9はLDL受容体を分解へ導く。小腸ではNPC1L1がコレステロールを吸収する。",
+ draw:()=>C(140,4,196,184,"肝細胞")+B("gut",8,10,112,34,"小腸\nNPC1L1で吸収")+A(120,30,146,100,1)
+  +B("acc",150,14,110,22,"アセチルCoA")+B("hmg",150,50,110,22,"HMG-CoA還元酵素")+B("chol",150,86,110,22,"コレステロール")
+  +B("srebp",150,124,110,34,"SREBP2活性化\n→ LDLR転写↑")+A(205,36,205,50)+A(205,72,205,86)+A(205,108,205,124,1)+T(212,120,"減ると")
+  +B("ldlr",270,86,62,34,"LDL\n受容体")+A(260,141,284,120)
+  +B("ldl",270,204,62,34,"LDL")+A(301,204,301,120)+T(248,198,"取り込み")
+  +B("pcsk9",150,204,96,34,"PCSK9\n（分泌される）")+A(232,204,280,122,1)
+  +B("ppar",8,96,112,34,"PPARα（核内）\n中性脂肪の分解↑"),
+ map:{statin:["hmg","chol","srebp","ldlr"],eze:["gut"],pcsk9ab:["pcsk9","ldlr"],pcsk9si:["pcsk9"],fib:["ppar"]}},
+ad:{vb:[340,244],cap:"APPから切り出されたAβが凝集してオリゴマー・プロトフィブリル、老人斑になる。抗Aβ抗体は凝集体に結合し、ミクログリアのFc受容体を介した除去を促す。シナプスではAChEがアセチルコリンを分解し、NMDA受容体がグルタミン酸の信号を受ける。タウの凝集を標的とする承認薬はまだない。",
+ draw:()=>B("app",8,10,110,22,"APP（膜タンパク質）")+B("abm",130,10,92,22,"Aβ（単量体）")+B("proto",234,4,98,34,"オリゴマー・\nプロトフィブリル")+B("plaque",234,58,98,22,"老人斑")
+  +A(118,21,130,21)+A(222,21,234,21)+A(283,38,283,58)+B("micro",130,52,92,34,"ミクログリア\nFc受容体")+A(222,62,234,40,1)+T(150,100,"抗体が結合すると貪食")
+  +B("pre",8,112,110,34,"前シナプス\nACh・Glu放出")+B("ache",130,112,92,22,"AChE（ACh分解）")+B("nmda",234,140,98,22,"NMDA受容体")
+  +A(118,123,130,123)+A(118,140,234,151)+B("post",130,172,202,22,"後シナプスの神経細胞")+A(283,162,283,172)
+  +B("tau",8,206,150,34,"リン酸化タウの凝集\n（神経原線維変化）")+B("loss",182,206,150,34,"神経細胞と\nシナプスの減少")+A(158,223,182,223),
+ map:{abeta:["proto","plaque","micro"],ache:["ache"],nmda:["nmda"]}},
+sma:{vb:[340,250],cap:"SMN1が働かないと、SMNはSMN2から作られる分に頼る。SMN2のmRNA前駆体の多くはエクソン7が抜け、不安定なタンパク質になる。ヌシネルセンとリスジプラムはスプライシングを変えて完全長のmRNAを増やし、オナセムノゲンはSMN1を補う。",
+ draw:()=>B("smn1",8,10,152,34,"SMN1遺伝子\n欠失・変異（働かない）")+B("smn2",180,10,152,34,"SMN2遺伝子\nエクソン7に1塩基の違い")
+  +B("pre",180,62,152,22,"mRNA前駆体（6-7-8）")+A(256,44,256,62)
+  +B("d7",180,104,72,34,"エクソン7\n欠落（多い）")+B("fl",260,104,72,34,"完全長\n（少ない）")+A(230,84,216,104)+A(282,84,296,104)
+  +B("unst",180,156,72,34,"不安定な\nSMN→分解")+A(216,138,216,156)+B("smn",260,156,72,34,"SMN\nタンパク質")+A(296,138,296,156)
+  +B("aav",8,104,152,34,"AAV9ベクター\nSMN1のcDNA")+B("mn",8,208,324,34,"運動ニューロンの生存")+A(296,190,296,208)+A(84,138,84,208)+T(92,180,"SMNを作らせる"),
+ map:{nus:["pre","fl"],ris:["pre","fl"],ona:["aav","smn"]}},
+hemo:{vb:[340,250],cap:"組織因子と第VIIa因子が反応を始め、第IXa因子と補因子の第VIIIa因子からなるテナーゼ複合体が第X因子の活性化を大きく増幅する。TFPIとアンチトロンビンは凝固を抑える。血友病ではテナーゼが働かず、トロンビンが十分に作られない。",
+ draw:()=>B("tf",8,10,112,34,"組織因子\n＋第VIIa因子")+B("tfpi",150,10,72,34,"TFPI\n（抑制）")+INH(150,27,120,27)
+  +B("f9",8,64,100,22,"第IXa因子")+B("f8",8,96,100,22,"第VIIIa因子")+A(64,44,64,64,1)
+  +B("ten",220,64,112,34,"テナーゼ複合体\n（増幅）")+A(108,75,220,78)+A(108,107,220,88)
+  +B("emi",116,132,96,22,"二重特異性抗体")+A(212,140,248,98,1)+T(116,170,"第VIIIa因子の代わりに")+T(116,183,"第IXa因子と第X因子をつなぐ")
+  +B("f10",220,132,112,22,"第Xa因子")+A(276,98,276,132)
+  +B("thr",220,176,112,22,"トロンビン")+A(276,154,276,176)+B("fib",220,218,112,22,"フィブリン → 止血")+A(276,198,276,218)
+  +B("at",8,206,112,22,"アンチトロンビン")+INH(120,217,220,190),
+ map:{fac:["f9","f8"],emi:["emi","ten"],rebal:["tfpi","at"],gt:["f9","f8"]}},
+allergy:{vb:[340,262],cap:"バリアが弱い上皮からTSLPやIL-33が出て、Th2細胞と2型自然リンパ球（ILC2）を活性化する。IL-4/IL-13はB細胞のIgEへのクラススイッチや組織の変化を、IL-5は好酸球の増加を起こす。IgEはマスト細胞のFcεRIに結合し、アレルゲンで脱顆粒が起こる。IL-31はかゆみを起こす。",
+ draw:()=>B("epi",8,10,152,34,"上皮（皮膚・気道）\nバリア低下")+B("tslp",180,10,152,34,"TSLP・IL-33\n（上皮のサイトカイン）")+A(160,27,180,27)
+  +B("th2",180,64,152,34,"Th2細胞・ILC2")+A(256,44,256,64)
+  +B("il4",180,118,72,34,"IL-4\nIL-13")+B("il5",260,118,72,34,"IL-5")+A(230,98,216,118)+A(282,98,296,118)
+  +B("bcell",8,118,152,34,"B細胞\nIgEへクラススイッチ")+A(180,135,160,135)
+  +B("r4",180,172,72,22,"IL-4Rα")+A(216,152,216,172)+B("eos",260,172,72,22,"好酸球")+A(296,152,296,172)
+  +B("ige",8,172,62,22,"IgE")+B("mast",82,172,78,34,"マスト細胞\nFcεRI")+A(39,152,39,172)+A(70,183,82,183)
+  +B("smooth",8,228,152,24,"気道平滑筋の収縮")+A(121,206,100,228)+B("itch",180,228,152,24,"IL-31 → かゆみ"),
+ map:{ics:["th2","il4","il5"],bron:["smooth"],ige:["ige","mast"],il5:["il5","eos"],il4r:["r4","il4"],tslp:["tslp"],jak2:["r4","itch"],il31:["itch"]}},
+virus:{vb:[340,262],cap:"ウイルスは受容体に結合して侵入し、脱殻して遺伝子を放出する。HIVはRNAをDNAに逆転写して核の染色体に組み込む。RNAウイルスはRNA依存性RNAポリメラーゼで複製する。ウイルスのタンパク質はプロテアーゼで切り分けられ、組み立てられて放出される。インフルエンザは放出時にノイラミニダーゼを使う。",
+ draw:()=>B("ab",8,4,80,24,"中和抗体")+B("vir",108,4,72,24,"ウイルス")+INH(88,16,108,16)+B("vac",200,4,132,24,"ワクチン：抗体を作らせる")
+  +C(8,44,326,212,"感染した細胞")+B("rec",98,34,92,22,"受容体・CCR5")+A(144,28,144,34)
+  +B("unc",18,76,104,22,"脱殻（カプシド）")+A(118,56,80,76)
+  +B("rt",18,114,104,34,"逆転写\nRNA→DNA（HIV）")+A(70,98,70,114)
+  +B("nuc",18,172,140,34,"核：組み込み\n（インテグラーゼ）")+A(70,148,70,172)
+  +B("rep",150,76,172,34,"RNA複製・転写\nRdRp・キャップ切断")+A(122,87,150,91)
+  +B("prot",190,126,132,34,"ポリタンパク質を\nプロテアーゼで切断")+A(236,110,256,126)+A(158,186,190,150,1)
+  +B("asm",190,174,132,22,"組み立て")+A(256,160,256,174)
+  +B("rel",190,208,132,34,"出芽・放出\nノイラミニダーゼ")+A(256,196,256,208),
+ map:{entry:["rec","ab"],rt:["rt"],insti:["nuc"],pi2:["prot"],pol:["rep"],nai:["rel"],caps:["unc","asm"],vac:["vac","vir"]}}
+});
+Object.assign(CLASS_FIG,{mtx:"ra",tnf:"ra",il6:"ra",abat:"ra",jak:"ra",rankl:"ra",statin:"lipid",eze:"lipid",pcsk9ab:"lipid",pcsk9si:"lipid",fib:"lipid",
+ abeta:"ad",ache:"ad",nmda:"ad",nus:"sma",ris:"sma",ona:"sma",fac:"hemo",emi:"hemo",rebal:"hemo",gt:"hemo",
+ ics:"allergy",bron:"allergy",ige:"allergy",il5:"allergy",il4r:"allergy",tslp:"allergy",jak2:"allergy",il31:"allergy",
+ entry:"virus",rt:"virus",insti:"virus",pi2:"virus",pol:"virus",caps:"virus",nai:"virus",vac:"virus"});
+
+// ---------- modality data ----------
+const SRC_NIHS={k:"公的",t:"国立医薬品食品衛生研究所 遺伝子医薬部 第2室（核酸医薬の定義）",u:"https://www.nihs.go.jp/mtgt/section2.html"};
+const SRC_YTE={k:"総説",t:"YTE-engineered antibodies（Int J Mol Immuno Oncol）",u:"https://ijmio.com/yte-engineered-antibodies-from-neonatal-fc-receptor-binding-mechanisms-to-next-generation-therapeutics/"};
+const SRC_MJ={k:"添付文書",t:"MOUNJARO 米国添付文書 11 Description・12.1（DailyMed）",u:"https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=d2d7da5d-ad07-4228-955f-cf7e355c8cc0"};
+const MODS=[
+{id:"sm",p:null,name:"低分子医薬",en:"Small molecules",fig:"sm",ver:"none",
+ mw:"おおむね 500 Da 以下",route:"経口が多い（注射もある）",
+ def:"化学合成で作る小さな有機化合物。細胞膜を透過できるため、細胞内の酵素・キナーゼ・受容体にも届く。",
+ how:"標的タンパク質の結合ポケット（活性部位やアロステリック部位）に結合し、酵素活性やシグナルを阻害、または受容体を活性化する。",
+ pros:"経口投与できる。細胞内の標的に届く。製造コストが比較的低く、品質を化学的に規定しやすい。",
+ cons:"結合ポケットの浅いタンパク質（タンパク質間相互作用の面など）は狙いにくい。構造の似たタンパク質への結合（オフターゲット）が副作用になる。",
+ ex:[{n:"イマチニブ",en:"imatinib",sm:1},{n:"メトホルミン",en:"metformin",sm:1},{n:"シタグリプチン",en:"sitagliptin",sm:1}],
+ links:["met","su","sglt2","dpp4","egfr","cdk","parp","bcrabl"]},
+{id:"cov",p:"sm",name:"共有結合型阻害薬",en:"Covalent inhibitors",fig:"cov",ver:"none",
+ mw:"低分子と同程度",route:"経口",
+ def:"標的タンパク質の特定のアミノ酸（主にシステイン）と共有結合をつくる反応基（弾頭）をもつ低分子。",
+ how:"まず可逆的にポケットへ結合し、近くにある求核性のシステインと反応して共有結合を作る。結合が残るため、血中濃度が下がっても阻害が続く。",
+ eng:["標的側のアミノ酸1つが効き目を決める。EGFRのC797がセリンに置換される変異（C797S）でオシメルチニブは結合できなくなる。","KRAS G12Cでは、グリシン→システイン置換そのものが薬の結合点になる。"],
+ pros:"選択性が高く、阻害が持続する。浅いポケットや変異で生じたシステインも狙える。",
+ cons:"標的システインの変異で耐性になる。反応性に由来するオフターゲットへの配慮が必要。",
+ ex:[{n:"オシメルチニブ（EGFR C797）",en:"osimertinib",sm:1},{n:"ソトラシブ（KRAS G12C）",en:"sotorasib",sm:1},{n:"イブルチニブ（BTK C481）",en:"ibrutinib",sm:1}],
+ links:["egfr","kras"]},
+{id:"deg",p:"sm",name:"標的タンパク質分解薬",en:"Targeted protein degraders",fig:"deg",ver:"none",
+ mw:"分子接着剤は低分子並み。PROTACは多くが 700 Da 超",route:"経口が多い",
+ def:"標的タンパク質をE3ユビキチンリガーゼに近づけ、細胞のユビキチン–プロテアソーム系で分解させる低分子。PROTACは標的リガンドとE3リガンドをリンカーでつないだ二価分子。分子接着剤は単一の小分子でE3の表面を変え、本来の基質でないタンパク質を認識させる。",
+ how:"標的–分解薬–E3の三者複合体ができると、標的にユビキチン鎖が付き、プロテアソームで分解される。分解薬は次の標的に再利用されるため、触媒的に働く。",
+ pros:"酵素活性のないタンパク質や、ポケットの浅いタンパク質も除去できる。阻害ではなく除去なので、足場としての機能も失わせられる。",
+ cons:"PROTACは分子量が大きく、経口吸収と膜透過の最適化が難しい。E3の発現量や変異で効き方が変わる。",
+ note:"PROTACは臨床開発中の品目が多いため、承認状況は最新情報で確認してください。",
+ ex:[{n:"レナリドミド（分子接着剤：セレブロンに結合し、IKZF1/IKZF3を分解）",en:"lenalidomide",sm:1},{n:"ポマリドミド",en:"pomalidomide",sm:1}],links:[]},
+{id:"pep",p:null,name:"ペプチド医薬",en:"Peptides",fig:"pep",ver:"none",
+ mw:"約 500–5,000 Da（中分子）",route:"皮下注射が多い（経口セマグルチドは吸収促進剤SNACと配合）",
+ def:"アミノ酸が数個〜数十個つながった分子。低分子と抗体の中間の大きさで、中分子とも呼ばれる。",
+ how:"内因性ペプチドホルモンの受容体に結合して作用を模倣する（GLP-1アナログなど）か、タンパク質間相互作用を妨げる。",
+ pros:"受容体への選択性が高い。内因性ホルモンを出発点に設計できる。化学合成でも作れる。",
+ cons:"プロテアーゼで分解されやすく腎排泄も速いため、天然のGLP-1の半減期は数分程度。経口吸収が低い。",
+ ex:[{n:"セマグルチド",en:"semaglutide"},{n:"チルゼパチド",en:"tirzepatide"},{n:"リラグルチド",en:"liraglutide"}],links:["glp1","tirz"]},
+{id:"lipopep",p:"pep",name:"脂肪酸修飾ペプチド",en:"Lipidated peptides",fig:"pep",ver:"label",
+ mw:"約 3,500–5,000 Da（チルゼパチド 4,813.53 Da）",route:"皮下注射（週1回製剤あり）",
+ def:"ペプチドのリシン側鎖に、リンカーを介して脂肪酸（脂肪二酸）を付けたもの。",
+ how:"脂肪酸部分が血中のアルブミンに結合し、腎臓でのろ過と分解を避けて長く循環する。",
+ eng:["チルゼパチドはGIPの配列をもとに、2位と13位を非天然アミノ酸Aib（α-アミノイソ酪酸）に置換し、C末端をアミド化している。","20位のリシンにリンカーを介してC20脂肪二酸（1,20-エイコサン二酸）を付け、アルブミン結合で半減期を約5日に延ばして週1回投与にしている。"],
+ pros:"週1回投与まで半減期を延ばせる。",cons:"注射剤が中心。消化器症状が出やすい。",
+ ex:[{n:"チルゼパチド",en:"tirzepatide"},{n:"セマグルチド",en:"semaglutide"}],links:["tirz","glp1"],src:[SRC_MJ]},
+{id:"cyc",p:"pep",name:"環状ペプチド",en:"Cyclic peptides",fig:"cyc",ver:"none",
+ mw:"約 1,000–2,000 Da（シクロスポリン 約1,203 Da）",route:"経口・注射",
+ def:"ペプチド鎖の両端や側鎖どうしをつないで環にしたもの。",
+ how:"環化で立体構造が固定され、標的への結合が強まり、プロテアーゼに分解されにくくなる。N-メチル化で水素結合ドナーを減らし、膜透過性を上げた例もある。",
+ pros:"直線ペプチドより安定で、タンパク質間相互作用の広い面にも結合できる。",cons:"膜透過性と経口吸収の設計が難しい。",
+ ex:[{n:"シクロスポリン（11残基中7残基がN-メチル化、経口可能）",en:"cyclosporine"}],links:[]},
+{id:"protein",p:null,name:"タンパク質医薬",en:"Therapeutic proteins",fig:"insulin",ver:"none",
+ mw:"約 5.8 kDa（インスリン）〜数百 kDa",route:"注射",
+ def:"遺伝子組換え技術で細胞（大腸菌、酵母、CHO細胞など）に作らせるタンパク質。ホルモン、酵素、サイトカイン、融合タンパク質などがある。抗体もタンパク質医薬の一種だが、ここでは別に扱う。",
+ how:"不足している内因性タンパク質を補う（インスリン、酵素補充療法）、または受容体のおとりとしてリガンドを捕捉する。",
+ pros:"生体内の分子そのものか、その改変体なので作用が明確。",cons:"注射が必要。抗薬物抗体ができることがある（免疫原性）。細胞培養による製造で品質管理が複雑。",
+ ex:[{n:"ヒトインスリン",en:"insulin human"},{n:"イミグルセラーゼ（ゴーシェ病の酵素補充）",en:"imiglucerase"}],links:["insulin"]},
+{id:"recomb",p:"protein",name:"組換えホルモン・アナログ",en:"Recombinant hormones and analogues",fig:"insulin",ver:"none",
+ mw:"インスリン 約 5.8 kDa（A鎖21残基＋B鎖30残基）",route:"皮下注射",
+ def:"内因性ホルモンを組換えで作ったもの、およびアミノ酸置換などで体内動態を変えたアナログ。",
+ how:"内因性ホルモンと同じ受容体に結合する。インスリンアナログは受容体への作用を保ったまま、皮下からの吸収速度を変えている。",
+ eng:["インスリンは製剤中や皮下で六量体を作り、単量体に解離してから吸収される。","リスプロはB28のプロリンとB29のリシンを入れ替え、アスパルトはB28プロリンをアスパラギン酸に置換して、六量体を壊れやすくし吸収を速めた。","グラルギンはA21をグリシンに置換し、B鎖C末端にアルギニン2残基を付加した。等電点が中性付近に上がり、皮下で沈殿してからゆっくり溶け出す。","デグルデクはB30を除き、B29リシンに脂肪二酸を付けて、皮下でマルチヘキサマーを作らせる。"],
+ pros:"同じ受容体作用のまま、効き始めと持続時間を設計できる。",cons:"低血糖。注射が必要。",
+ ex:[{n:"インスリン リスプロ",en:"insulin lispro"},{n:"インスリン アスパルト",en:"insulin aspart"},{n:"インスリン グラルギン",en:"insulin glargine"},{n:"インスリン デグルデク",en:"insulin degludec"}],links:["insulin"]},
+{id:"fcfus",p:"protein",name:"Fc融合タンパク質",en:"Fc-fusion proteins",fig:"fcfus",ver:"none",
+ mw:"約 100–150 kDa",route:"皮下・静脈・硝子体内",
+ def:"受容体の細胞外ドメインなどの機能ドメインを、IgGのFc領域につないだもの。",
+ how:"受容体ドメインがリガンドに結合しておとり（デコイ）として働き、本来の受容体への結合を防ぐ。Fc部分がFcRnで再利用され、半減期が延びる。",
+ pros:"天然の受容体の結合特性をそのまま使える。",cons:"注射が必要。",
+ ex:[{n:"エタネルセプト（TNFR2–Fc）",en:"etanercept"},{n:"アフリベルセプト（VEGFR1・VEGFR2のドメイン–Fc）",en:"aflibercept"}],links:["vegf"]},
+{id:"ab",p:null,name:"抗体医薬",en:"Antibody therapeutics",fig:"igg",ver:"none",
+ mw:"IgG 約 150 kDa",route:"静脈・皮下注射",
+ def:"特定の抗原に結合するモノクローナル抗体を有効成分とする医薬品。基本形はIgGで、重鎖2本と軽鎖2本からなるY字形。抗原に結合するFabと、免疫細胞の受容体やFcRnに結合するFcに分かれる。",
+ how:"リガンドや受容体に結合して働きを止める（中和・遮断）。Fcを介して免疫細胞に標的細胞を攻撃させる（ADCC・ADCP）。補体を活性化する（CDC）。薬物や別の結合部位を運ぶ（ADC・二重特異性抗体）。",
+ pros:"特異性が非常に高い。FcRnによる再利用で半減期が長い（IgG1でおよそ3週間）。",
+ cons:"細胞内の標的には届かない。分子が大きく、組織への浸透が限られる。注射が必要で、製造コストが高い。",
+ note:"従来の命名規則では、語尾で由来を示していた（-ximab：キメラ、-zumab：ヒト化、-umab：ヒト）。近年の新規名称は別の規則に移行している。",
+ ex:[{n:"トラスツズマブ",en:"trastuzumab"},{n:"ニボルマブ",en:"nivolumab"},{n:"ベバシズマブ",en:"bevacizumab"}],links:["her2","pd1","ctla4","vegf"]},
+{id:"igg",p:"ab",name:"IgG抗体（ネイキッド抗体）",en:"Naked IgG antibodies",fig:"igg",ver:"none",
+ mw:"約 150 kDa",route:"静脈・皮下注射",
+ def:"薬物を付けず、抗体そのものの働きを使う抗体。可変部がマウス由来のキメラ抗体、CDRだけがマウス由来のヒト化抗体、すべてヒト配列の完全ヒト抗体がある。",
+ how:"中和・受容体遮断・ADCC・CDCで作用する。サブクラスで働きが変わり、IgG1はエフェクター機能が強く、IgG4は弱い。",
+ pros:"作用が抗原結合とFc機能で説明しやすい。",cons:"抗原陽性でも効果が出ない場合がある（シグナルの迂回など）。",
+ ex:[{n:"トラスツズマブ（IgG1、ADCCも利用）",en:"trastuzumab"},{n:"ニボルマブ（IgG4）",en:"nivolumab"},{n:"ベバシズマブ",en:"bevacizumab"}],links:["her2","pd1","ctla4","vegf"]},
+{id:"fceng",p:"ab",name:"Fc改変抗体",en:"Fc-engineered antibodies",fig:"fceng",ver:"review",
+ mw:"約 150 kDa",route:"静脈・皮下・筋肉内注射",
+ def:"Fc領域のアミノ酸置換や糖鎖の改変で、半減期やエフェクター機能を調整した抗体。番号はEU番号。",
+ how:"エンドソームの酸性条件（pH 6付近）でFcRnへの結合を強めると、リソソームでの分解を逃れて血中に戻る割合が増え、半減期が延びる。中性の血中では結合が弱いままなので、FcRnから離れて循環に戻る。FcγRへの結合を強めればADCCが上がり、弱めれば不要な免疫活性化を避けられる。",
+ eng:["YTE（M252Y/S254T/T256E）：酸性条件でのFcRn結合を強め、半減期を延ばす。例：ニルセビマブ（乳児のRSV予防）","LS（M428L/N434S）：同じくFcRn結合を強める。例：ラブリズマブ（エクリズマブを改変した長時間作用型の抗C5抗体）","LALA（L234A/L235A）、N297A（糖鎖除去）：FcγRへの結合を弱め、エフェクター機能を除く","S228P（IgG4）：ヒンジを安定化し、Fabアーム交換（半分子の入れ替わり）を防ぐ。ニボルマブ、ペムブロリズマブで採用","低フコース化：Fc糖鎖のコアフコースを除くとFcγRIIIaへの結合が強まり、ADCCが上がる。例：モガムリズマブ、オビヌツズマブ"],
+ pros:"投与間隔の延長や、作用の強弱をアミノ酸置換で設計できる。",cons:"改変で免疫原性や安定性が変わる可能性があり、個別に評価が必要。",
+ ex:[{n:"ニルセビマブ（YTE）",en:"nirsevimab"},{n:"ラブリズマブ（LS）",en:"ravulizumab"},{n:"モガムリズマブ（低フコース）",en:"mogamulizumab"}],links:["pd1"],src:[SRC_YTE]},
+{id:"adcm",p:"ab",name:"抗体薬物複合体（ADC）",en:"Antibody–drug conjugates",fig:"adcm",ver:"none",
+ mw:"約 150–160 kDa",route:"静脈注射",
+ def:"抗体に、リンカーを介して強力な細胞傷害性の低分子（ペイロード）を結合したもの。1抗体あたりの薬物数をDAR（drug-to-antibody ratio）と呼ぶ。",
+ how:"抗体が抗原に結合して細胞内に取り込まれ、リソソームでリンカーが切れる（または抗体が分解される）とペイロードが放出される。",
+ eng:["切断型リンカー（ペプチド、ヒドラゾンなど）と非切断型リンカーがある。","トラスツズマブ エムタンシンは非切断型リンカーでDAR約3.5、トラスツズマブ デルクステカンは切断型リンカーでDAR約8。","結合位置とDARをそろえるため、システインや非天然アミノ酸を導入する部位特異的コンジュゲーションも使われる。"],
+ pros:"全身投与では毒性が強すぎる薬物を、抗原陽性の細胞に集中させられる。",cons:"ペイロード由来の毒性（間質性肺疾患、骨髄抑制など）。抗原の発現量に効果が左右される。",
+ ex:[{n:"トラスツズマブ デルクステカン",en:"trastuzumab deruxtecan"},{n:"トラスツズマブ エムタンシン",en:"ado-trastuzumab emtansine"},{n:"エンホルツマブ ベドチン",en:"enfortumab vedotin"}],links:["adc"]},
+{id:"bsab",p:"ab",name:"二重特異性抗体（bsAb）",en:"Bispecific antibodies",fig:"bsab",ver:"none",
+ mw:"BiTE 約 55 kDa／IgG型 約 150 kDa",route:"静脈・皮下注射",
+ def:"2種類の異なる抗原（またはエピトープ）に結合する抗体。",
+ how:"T細胞のCD3とがん抗原を架橋してT細胞に攻撃させる（T細胞誘導型）。2つのタンパク質を近づけて機能を代替する（エミシズマブ）。2つのリガンドを同時に遮断する（ファリシマブ）。",
+ eng:["IgG型では、異なる重鎖どうしが正しく対合するよう工夫する。knobs-into-holesは、CH3の一方にT366W（knob）、もう一方にT366S/L368A/Y407V（hole）を入れて、ヘテロ二量体を優先させる。","BiTEは2つのscFvをつないだ小さな分子でFcがない。半減期が短いため、ブリナツモマブは持続点滴で投与する。"],
+ pros:"1分子で2つの機能を組み合わせられる。",cons:"サイトカイン放出症候群（T細胞誘導型）。製造時の誤対合の管理。",
+ ex:[{n:"ブリナツモマブ（CD19×CD3）",en:"blinatumomab"},{n:"エミシズマブ（第IXa因子×第X因子。第VIII因子の機能を代替）",en:"emicizumab"},{n:"ファリシマブ（Ang-2×VEGF-A）",en:"faricimab"}],links:["bite"]},
+{id:"frag",p:"ab",name:"抗体断片（Fab・VHH）",en:"Antibody fragments",fig:"frag",ver:"none",
+ mw:"Fab 約 50 kDa／VHH 約 15 kDa",route:"硝子体内・静脈・皮下",
+ def:"抗体の抗原結合部分だけを取り出した分子。FabはIgGの腕にあたる部分。VHH（ナノボディ）はラクダ科動物の重鎖抗体の可変ドメインで、単一ドメインで抗原に結合する。",
+ how:"Fcがないため、FcRnによる再利用やエフェクター機能はなく、抗原への結合と遮断だけで作用する。",
+ pros:"小さく組織に浸透しやすい。微生物で生産しやすい。",cons:"全身投与では半減期が短い。",
+ ex:[{n:"ラニビズマブ（抗VEGF-A Fab、硝子体内投与）",en:"ranibizumab"},{n:"カプラシズマブ（抗vWF VHH二量体）",en:"caplacizumab"}],links:[]},
+{id:"na",p:null,name:"核酸医薬",en:"Nucleic acid therapeutics",fig:"na",ver:"review",
+ mw:"オリゴ核酸は約 6–15 kDa（ASO・siRNA）",route:"皮下・静脈・髄腔内・硝子体内",
+ def:"国立医薬品食品衛生研究所の整理では、オリゴ核酸を有効成分とし、タンパク質に翻訳されずに作用する医薬品。代表はアンチセンス、siRNA、アプタマー。",
+ how:"mRNAやpre-mRNAに相補的に結合して分解やスプライシングを変える（ASO・siRNA）、または立体構造でタンパク質に結合する（アプタマー）。",
+ eng:["天然の核酸はヌクレアーゼで速やかに分解されるため、化学修飾が必須。ホスホロチオエート（PS）結合、2'-O-メチル・2'-MOE・2'-フルオロ、架橋型核酸（LNA/BNA）などで安定性と結合力を上げる。","肝臓へはGalNAc結合（アシアロ糖タンパク質受容体を介した取り込み）や脂質ナノ粒子（LNP）で送達する。"],
+ pros:"塩基配列を変えるだけで新しい標的を設計できる。低分子や抗体で狙えないRNAそのものを標的にできる。",
+ cons:"送達先が肝臓・中枢神経・眼などに限られやすい。配列の似たRNAへの結合（オフターゲット）や自然免疫の活性化。",
+ note:"mRNAはタンパク質に翻訳されて働くため、上の定義（核酸医薬品）には含まれず、規制上は別に扱われる。このページでは整理のため同じ枠に置いている。",
+ ex:[],links:[],src:[SRC_NIHS]},
+{id:"aso",p:"na",name:"アンチセンス核酸（ASO）",en:"Antisense oligonucleotides",fig:"aso",ver:"none",
+ mw:"約 6–8 kDa（一本鎖で十数〜20塩基程度）",route:"皮下・静脈・髄腔内",
+ def:"標的RNAに相補的な一本鎖のオリゴ核酸。",
+ how:"ギャップマー型では、中央のDNA部分（ギャップ）が標的RNAと二本鎖を作り、RNase Hが標的RNAを切断する。スプライシング制御型は、pre-mRNAのスプライシング部位に結合して立体的に妨げ、エクソンの取り込みや読み飛ばしを変える。",
+ eng:["ギャップマーの両端（ウィング）は2'-MOEやLNAで修飾して、安定性と標的への結合力を上げる。中央はRNase Hが認識できるようDNAのまま残す。","スプライシング制御型はRNase Hを呼ばないよう全長を修飾する（2'-MOE、モルフォリノなど）。"],
+ pros:"タンパク質を作る前の段階で量や形を変えられる。",cons:"細胞内への送達効率。血小板減少や腎毒性が問題になった薬剤がある。",
+ ex:[{n:"トフェルセン（SOD1 mRNAを分解するギャップマー、ALS）",en:"tofersen"},{n:"ヌシネルセン（SMN2のエクソン7を取り込ませる、脊髄性筋萎縮症、髄腔内投与）",en:"nusinersen"},{n:"ビルトラルセン（エクソン53スキップ、モルフォリノ核酸、デュシェンヌ型筋ジストロフィー）",en:"viltolarsen"}],links:[]},
+{id:"sirna",p:"na",name:"siRNA",en:"Small interfering RNA",fig:"sirna",ver:"none",
+ mw:"約 13 kDa（21塩基前後の二本鎖）",route:"皮下・静脈",
+ def:"21塩基前後の二本鎖RNA。",
+ how:"細胞内でガイド鎖がRISC（Argonaute 2を含む複合体）に取り込まれ、相補的なmRNAを切断する。RISCは繰り返し働くため、少ない分子数で長く効く。",
+ eng:["GalNAc結合siRNAは肝細胞のアシアロ糖タンパク質受容体（ASGPR）を介して取り込まれ、皮下投与で肝臓の遺伝子を抑えられる。","インクリシランは初回・3か月後の後は6か月ごとの投与で、PCSK9を抑えてLDLコレステロールを下げる。"],
+ pros:"作用が長く続き、投与間隔を長くできる。",cons:"肝臓以外への送達はまだ限られる。",
+ ex:[{n:"パチシラン（TTR、LNP）",en:"patisiran"},{n:"ギボシラン（ALAS1、GalNAc）",en:"givosiran"},{n:"インクリシラン（PCSK9、GalNAc）",en:"inclisiran"}],links:[]},
+{id:"mrna",p:"na",name:"mRNA",en:"Messenger RNA",fig:"mrna",ver:"none",
+ mw:"数千塩基で 1 MDa 以上",route:"筋肉内注射（ワクチン）など",
+ def:"目的タンパク質の設計図となるmRNAを試験管内転写（IVT）で合成して投与するもの。5'キャップ、5'UTR、コード領域、3'UTR、ポリA尾部からなる。",
+ how:"脂質ナノ粒子（LNP）に封入して投与し、細胞に取り込まれた後、細胞質でリボソームに翻訳されて抗原などのタンパク質ができる。核には入らず、ゲノムに組み込まれない。",
+ eng:["ウリジンをN1-メチルシュードウリジンに置き換えると、自然免疫による認識が減り、翻訳効率が上がる。","LNPのイオン化脂質はエンドソーム内の酸性条件で正に帯電し、膜を不安定化してmRNAを細胞質に放出する。"],
+ pros:"配列を変えるだけで短期間に設計・製造できる。",cons:"低温での保管が必要な製剤が多い。発熱などの反応原性。",
+ note:"規制上の「核酸医薬品」（オリゴ核酸）には含まれない。",
+ ex:[{n:"トジナメラン（BNT162b2）",en:"Comirnaty"},{n:"エラソメラン（mRNA-1273）",en:"Spikevax"}],links:[]},
+{id:"apt",p:"na",name:"アプタマー",en:"Aptamers",fig:"apt",ver:"none",
+ mw:"約 10 kDa（PEG修飾で約50 kDaになるものもある）",route:"硝子体内など",
+ def:"特定のタンパク質に結合するよう選ばれた一本鎖のDNAまたはRNA。配列の相補性ではなく、立体構造で結合する点がASOやsiRNAと異なる。",
+ how:"SELEX法（ランダム配列のライブラリから標的に結合するものを選別・増幅する操作の繰り返し）で得られ、抗体のように標的タンパク質の機能を遮断する。",
+ eng:["ヌクレアーゼ耐性のため2'-フルオロや2'-O-メチルで修飾し、腎排泄を遅らせるためPEGを付ける。","化学合成で作れ、ロット間の差が小さい。"],
+ pros:"化学合成でき、免疫原性が低いとされる。",cons:"承認品目が少なく、血中での安定性と半減期の確保が課題。",
+ ex:[{n:"ペガプタニブ（VEGF165、加齢黄斑変性、最初に承認されたアプタマー）",en:"pegaptanib"},{n:"アバシンカプタド ペゴル（補体C5、地図状萎縮）",en:"avacincaptad pegol"}],links:["vegf"]},
+{id:"virus",p:null,name:"ウイルス医薬品",en:"Viral therapeutics and vectors",fig:"virus",ver:"none",
+ mw:"粒子径 約 25 nm（AAV）〜 100 nm超（ヘルペスウイルス）",route:"静脈・腫瘍内・網膜下など",
+ def:"ウイルス粒子そのものを有効成分とする医薬品。がん細胞で増えて破壊する腫瘍溶解性ウイルスと、増殖能を除いて治療遺伝子を運ぶウイルスベクターに大きく分かれる。日本ではカルタヘナ法（遺伝子組換え生物の使用規制）への対応も必要になる。",
+ how:"カプシド（とエンベロープ）が細胞に結合して侵入し、ウイルスゲノムや搭載した遺伝子を細胞内に届ける。",
+ pros:"遺伝子を細胞内へ効率よく届けられる。",cons:"既存の中和抗体で効かないことがある。製造規模と費用。免疫反応。",
+ ex:[],links:[]},
+{id:"onco",p:"virus",name:"腫瘍溶解性ウイルス",en:"Oncolytic viruses",fig:"onco",ver:"none",
+ mw:"ヘルペスウイルス（粒子径 100 nm超）",route:"腫瘍内投与",
+ def:"正常細胞では増えにくく、がん細胞で選択的に増殖するよう改変したウイルス。",
+ how:"がん細胞内で増殖して細胞を溶解し、放出されたウイルスが周囲のがん細胞に広がる。溶解で放出された腫瘍抗原が抗腫瘍免疫を誘導する。",
+ eng:["T-VEC（タリモジェン ラハーパレプベック）は単純ヘルペスウイルス1型から神経病原性に関わるICP34.5と、抗原提示を妨げるICP47を除き、GM-CSFを発現させている。","テセルパツレブ（G47Δ）は単純ヘルペスウイルス1型の3つの遺伝子（γ34.5、ICP6、α47）を改変したもので、日本で悪性神経膠腫に対し条件及び期限付き承認を受けた。"],
+ pros:"直接の殺細胞と免疫誘導を兼ねる。",cons:"投与できる部位が限られる。全身投与での効果は限定的。",
+ ex:[{n:"タリモジェン ラハーパレプベック（T-VEC、悪性黒色腫）",en:"talimogene laherparepvec"},{n:"テセルパツレブ（G47Δ、悪性神経膠腫）",en:"teserpaturev"}],links:["pd1"]},
+{id:"aav",p:"virus",name:"AAVベクター（in vivo遺伝子治療）",en:"AAV vectors",fig:"aav",ver:"none",
+ mw:"粒子径 約 25 nm（カプシド 約 3.7 MDa）",route:"静脈・網膜下など",
+ def:"病原性のないアデノ随伴ウイルスのカプシドに治療用遺伝子を詰め、体内に直接投与するもの。",
+ how:"細胞に入ったAAVゲノムは主に核内でエピソーム（染色体外）として留まり、治療用遺伝子を発現し続ける。分裂の少ない細胞（神経、筋、網膜など）で長く効く。",
+ eng:["搭載できるDNAは約4.7 kbまで。","カプシドの血清型（AAV9など）で臓器への指向性が変わり、カプシドのアミノ酸改変で指向性を変える研究も進んでいる。"],
+ pros:"1回の投与で長期間の効果が期待できる。",cons:"既存の中和抗体があると使えない。高用量で肝障害。再投与が難しい。",
+ ex:[{n:"オナセムノゲン アベパルボベク（AAV9でSMN1遺伝子を導入、脊髄性筋萎縮症、1回静注）",en:"onasemnogene abeparvovec"}],links:[]},
+{id:"lenti",p:"virus",name:"レンチウイルスベクター（ex vivo）",en:"Lentiviral vectors",fig:"lenti",ver:"none",
+ mw:"粒子径 約 100 nm",route:"体外で細胞に導入し、細胞を投与",
+ def:"HIV由来のレトロウイルスベクターで、増殖能を除き治療遺伝子を搭載したもの。主に体外で細胞に遺伝子を導入するのに使う。",
+ how:"導入遺伝子が宿主ゲノムに組み込まれるため、細胞が分裂しても遺伝子が引き継がれる。CAR-T細胞の製造や、造血幹細胞への遺伝子導入に使われる。",
+ pros:"分裂する細胞で長期に発現が続く。",cons:"組み込み位置による遺伝子活性化（挿入変異）のリスク評価が必要。",
+ ex:[{n:"チサゲンレクルユーセル（CD19 CAR-T、レンチウイルスで導入）",en:"tisagenlecleucel"},{n:"ベチベグロゲン オートテムセル（βサラセミア）",en:"betibeglogene autotemcel"}],links:["cart"]},
+{id:"cell",p:null,name:"細胞医薬（再生医療等製品）",en:"Cell therapies",fig:"cartm",ver:"none",
+ mw:"細胞（直径 約 10 µm）",route:"静脈内など",
+ def:"生きた細胞を有効成分とする製品。患者自身の細胞（自家）と他人の細胞（他家）がある。日本では再生医療等製品として、条件及び期限付承認の制度がある。",
+ how:"投与した細胞が体内で増殖・生着し、標的細胞を攻撃したり、因子を分泌して組織や免疫を調整したりする。",
+ pros:"1回の投与で長く効く場合がある。",cons:"自家製品は患者ごとの製造で時間と費用がかかる。品質のばらつき。",ex:[],links:["cart"]},
+{id:"cartm",p:"cell",name:"CAR-T細胞",en:"CAR T cells",fig:"cartm",ver:"none",
+ mw:"細胞",route:"静脈内（1回）",
+ def:"キメラ抗原受容体（CAR）の遺伝子を導入した患者自身のT細胞。",
+ how:"CARは抗原認識部位（scFv）、ヒンジ、膜貫通部、共刺激ドメイン、CD3ζからなる。抗原に結合するとT細胞が活性化・増殖して標的細胞を傷害する。MHCに依存しない。",
+ eng:["共刺激ドメインの種類で振る舞いが変わる。CD28型は速く強い反応、4-1BB型は長い持続が特徴とされる。"],
+ pros:"再発・難治性の血液がんで長期寛解が得られる例がある。",cons:"サイトカイン放出症候群、ICANS。固形がんでは効果が限られる。",
+ ex:[{n:"チサゲンレクルユーセル（CD19）",en:"tisagenlecleucel"},{n:"イデカブタゲン ビクルユーセル（BCMA）",en:"idecabtagene vicleucel"}],links:["cart","bite"]},
+{id:"msc",p:"cell",name:"間葉系幹細胞",en:"Mesenchymal stromal cells",fig:"msc",ver:"none",
+ mw:"細胞",route:"静脈内など",
+ def:"骨髄などから得られる間葉系の幹細胞・間質細胞を培養した製品。他家（ドナー）由来で作れる。",
+ how:"免疫調節因子を分泌し、過剰な免疫反応を抑えると考えられている。生着して組織に置き換わるより、分泌因子による作用が主とされる。",
+ pros:"他家由来で在庫として製造できる。",cons:"作用機序の詳細と、効果のばらつきの評価が課題。",
+ ex:[{n:"ヒト（同種）骨髄由来間葉系幹細胞（テムセル、急性移植片対宿主病）",en:"mesenchymal"}],links:[]},
+{id:"gene",p:null,name:"ゲノム編集",en:"Genome editing",fig:"edit",ver:"none",
+ mw:"—",route:"主に ex vivo（細胞を体外で編集して戻す）",
+ def:"CRISPR-Cas9などで細胞のゲノム配列を直接変える治療。遺伝子を足すウイルスベクター（ウイルス医薬品を参照）と違い、標的部位の配列そのものを変える。",
+ how:"エキサガムグロゲン オートテムセルは、患者の造血幹細胞（CD34陽性）を体外でCas9により編集し、BCL11A遺伝子の赤血球系エンハンサーを壊す。BCL11Aの発現が下がると胎児型ヘモグロビン（HbF）が再び作られ、鎌状赤血球症と輸血依存性βサラセミアの症状が改善する。",
+ pros:"1回の治療で原因を直接修正できる可能性がある。",cons:"移植前に骨髄破壊的な前処置（ブスルファン）が必要。オフターゲット編集の評価。",
+ ex:[{n:"エキサガムグロゲン オートテムセル",en:"exagamglogene autotemcel"}],links:[]},
+{id:"radio",p:null,name:"放射性医薬品（RI標識）",en:"Radiopharmaceuticals",fig:"radio",ver:"none",
+ mw:"リガンド部分は約 1 kDa 前後（低分子・ペプチド）",route:"静脈注射",
+ def:"標的に集まるリガンドに、キレーターを介して放射性核種を結合した医薬品。治療用（β線・α線）と診断用（γ線・PET）がある。",
+ how:"リガンドががん細胞の受容体などに集まり、核種の放射線が近くの細胞のDNAを損傷する。同じリガンドで診断用核種と治療用核種を使い分ける方式をセラノスティクスと呼ぶ。",
+ pros:"全身の転移巣に届く。画像で集積を確認してから治療できる。",cons:"放射線管理が必要。骨髄抑制、唾液腺や腎への集積による障害。",
+ ex:[{n:"ルテチウム（177Lu）ビピボチド テトラキセタン（PSMA、前立腺がん）",en:"lutetium Lu 177 vipivotide tetraxetan"},{n:"ルテチウム（177Lu）オキソドトレオチド（ソマトスタチン受容体、神経内分泌腫瘍）",en:"lutetium Lu 177 dotatate"},{n:"塩化ラジウム（223Ra）（α線、骨転移）",en:"radium Ra 223 dichloride"}],links:[]},
+{id:"vaccine",p:null,name:"ワクチン",en:"Vaccines",fig:"vaccine",ver:"none",
+ mw:"製剤の種類による",route:"筋肉内・皮下・経口・経鼻",
+ def:"抗原を投与して獲得免疫を誘導する医薬品。抗原の形により、不活化ワクチン、組換えタンパク・ウイルス様粒子（VLP）ワクチン、生ワクチン、mRNAワクチン、ウイルスベクターワクチンに分かれる。",
+ how:"抗原提示細胞が抗原を取り込んでT細胞に提示し、抗体産生と細胞性免疫、免疫記憶が成立する。",
+ pros:"予防効果が長く続く。",cons:"副反応。抗原変異への対応。",
+ note:"モダリティとしてはmRNA（核酸）やウイルスベクター（ウイルス医薬品）と重なる。",
+ ex:[{n:"HPVワクチン（VLP）",en:"Gardasil"},{n:"BCG（生ワクチン）",en:"BCG vaccine"}],links:[]},
+{id:"micro",p:null,name:"マイクロバイオーム医薬（生菌製剤）",en:"Live biotherapeutics",fig:"micro",ver:"none",
+ mw:"細菌（約 1 µm）",route:"経口・経直腸",
+ def:"生きた細菌の集団や特定の菌株を有効成分とする医薬品。",
+ how:"乱れた腸内細菌叢を回復させ、クロストリディオイデス・ディフィシル感染症の再発を抑える。",
+ pros:"抗菌薬と違う機序で再発を抑えられる。",cons:"ドナー由来製品の品質管理と、病原体混入の検査。",
+ ex:[{n:"便微生物叢製剤 Rebyota（米国）",en:"Rebyota"},{n:"経口の細菌芽胞製剤 Vowst（米国）",en:"Vowst"}],links:[]}
+];
+const MODBY=Object.fromEntries(MODS.map(m=>[m.id,m]));
+const MODNODE_DEFAULT={sm:"sm",pep:"pep",ab:"igg",adc:"adcm",cell:"cartm"};
+const MODNODE_OVR={insulin:{pep:"recomb"},tirz:{pep:"lipopep"},glp1:{pep:"lipopep"},egfr:{sm:"cov"},kras:{sm:"cov"},bite:{ab:"bsab"}};
+const CLASS_DZ={};for(const dz of ["diabetes","cancer"])for(const c of DATA[dz].classes)CLASS_DZ[c.id]=dz;
+const SIZES=[
+ ["メトホルミン",129,"m1"],["イマチニブ",494,"m1"],["シクロスポリン",1203,"m2"],["セマグルチド",4114,"m2"],["チルゼパチド",4814,"m2"],
+ ["インスリン",5808,"m3"],["ASO（18塩基）",7000,"m4"],["siRNA",13000,"m4"],["VHH",15000,"m5"],["Fab",50000,"m5"],
+ ["IgG抗体",150000,"m5"],["mRNA（約4,300塩基）",1400000,"m4"],["AAVカプシド",3700000,"m6"]];
+
+// ---------- modality level texts ----------
+const MLV={
+sm:["化学の反応で作る小さな分子の薬。多くは飲み薬で、細胞の中まで入って働く。","分子量が小さいので腸から吸収され、細胞膜も通り抜けられる。タンパク質のくぼみ（ポケット）にはまり込んで、その働きを止めたり強めたりする。"],
+cov:["標的のタンパク質と化学的にしっかり結合（共有結合）し、離れない低分子の薬。","普通の薬は標的に結合したり離れたりするが、共有結合型は標的の特定のアミノ酸（主にシステイン）と化学結合を作るので、長く効き続ける。"],
+deg:["標的のタンパク質を、細胞がもともと持っている分解の仕組みで壊させる薬。","細胞には、いらないタンパク質にユビキチンという小さなタンパク質をつけて分解する仕組みがある。分解薬は標的タンパク質にユビキチンをつけさせる。"],
+pep:["アミノ酸が数個〜数十個つながった薬。体の中のホルモンをもとに作られることが多い。","タンパク質より小さく、低分子より大きい。体のホルモンに似せて作ると受容体にぴったり結合するが、分解されやすいので工夫が必要。"],
+lipopep:["ペプチドに脂肪酸をつけて、体の中で長持ちするようにした薬。","脂肪酸の部分が血液中のアルブミンというタンパク質にくっつき、腎臓から出ていきにくく、分解もされにくくなる。週1回の注射で済む。"],
+cyc:["アミノ酸を輪の形につないだ薬。","輪にすると形が固定されて標的に強く結合し、分解されにくくなる。一部は飲み薬にもできる。"],
+protein:["体の中で働くタンパク質そのものを、細胞に作らせて薬にしたもの。","遺伝子組換え技術で、大腸菌や培養細胞にヒトのタンパク質を作らせて精製する。足りないホルモンや酵素を補うのに使う。"],
+recomb:["インスリンなどのホルモンを細胞に作らせた薬と、アミノ酸を一部変えて効き方を調整した薬。","アミノ酸を1〜数個変えるだけで、すぐ効くタイプや長く効くタイプが作れる。"],
+fcfus:["受容体の一部に、抗体の根元の部分（Fc）をつないだ薬。","受容体の部分が標的のタンパク質を捕まえ、Fcの部分が血液中に長く残る働きをする。"],
+ab:["体の免疫が作る抗体を、特定の標的だけに結合するように作った薬。","抗体はY字形のタンパク質で、先端で標的に結合し、根元（Fc）で免疫細胞を呼んだり血液中に長く残ったりする。注射で使う。"],
+igg:["抗体をそのまま使う薬。標的に結合して働きを止めたり、免疫細胞に攻撃させたりする。","マウスの抗体の一部をヒトの配列に置き換えたヒト化抗体や、すべてヒトの配列の抗体が使われる。"],
+fceng:["抗体の根元（Fc）のアミノ酸を変えて、長持ちさせたり、免疫細胞を呼ぶ力を変えたりした抗体。","Fcは、血液中で抗体を長く残す受容体（FcRn）や、免疫細胞の受容体に結合する。アミノ酸を数個変えて、これらへの結合の強さを調整する。"],
+adcm:["抗体に強い薬をつないで、がん細胞に直接届ける薬。","抗体ががん細胞を見つけて結合し、細胞の中に入ってから薬が外れる。正常な細胞への影響を減らせる。"],
+bsab:["2種類の標的に同時に結合できる抗体。","普通の抗体の2本の腕は同じ相手に結合するが、二重特異性抗体は腕ごとに別の相手に結合する。2つの細胞やタンパク質を近づけることができる。"],
+frag:["抗体の、標的に結合する部分だけを取り出した小さな薬。","小さいので組織に入りやすいが、根元（Fc）がないので血液中に長くは残らない。"],
+na:["DNAやRNAと同じ材料（核酸）でできた薬。遺伝子の情報を運ぶRNAに直接はたらく。","核酸は塩基の並び（配列）で相手のRNAに結合できる。配列を変えるだけで、狙うRNAを変えられる。分解されやすいので化学的な改良が必要。"],
+aso:["1本鎖の短い核酸で、標的のRNAに結合して、壊したり作り方を変えたりする。","標的RNAと組み合う配列で作る。RNAを分解させるタイプと、RNAの切り貼り（スプライシング）を変えるタイプがある。"],
+sirna:["2本鎖の短いRNAで、細胞の仕組みを使って標的のRNAを壊す。","細胞には、RNAを使って別のRNAを切る仕組み（RNA干渉）がある。siRNAはこの仕組みで、狙ったタンパク質が作られないようにする。"],
+mrna:["タンパク質の設計図（mRNA）を体に入れて、体の細胞にタンパク質を作らせる。","脂質の粒（LNP）に包んで注射すると、細胞に取り込まれて設計図どおりのタンパク質が作られる。ワクチンでは、作られたウイルスのタンパク質に対して免疫ができる。"],
+apt:["核酸を立体的に折りたたんで、標的のタンパク質に結合させる薬。","配列の組み合わせではなく、形で標的に結合する。たくさんの配列の中から、標的に結合するものを選び出して作る。"],
+virus:["ウイルスの粒そのものを使う薬。がん細胞を壊すウイルスと、遺伝子を運ぶウイルス（ベクター）がある。","ウイルスは細胞に入り込む能力が高い。病気を起こす遺伝子を取り除き、治療に役立つ遺伝子を入れたり、がん細胞だけで増えるように変えたりする。"],
+onco:["がん細胞の中だけで増えて、がん細胞を壊すように改変したウイルス。","がん細胞で増えて細胞を壊し、出てきたウイルスがまわりのがん細胞にも広がる。壊れたがん細胞の成分によって、免疫もがんを攻撃するようになる。"],
+aav:["病気を起こさないウイルスの殻に、治療用の遺伝子を入れて体に届ける。","1回の投与で、遺伝子が届いた細胞が治療用のタンパク質を長く作り続ける。運べる遺伝子の大きさには上限がある。"],
+lenti:["取り出した細胞に遺伝子を入れるときに使うウイルス。入れた遺伝子は細胞の染色体に組み込まれる。","染色体に組み込まれるので、細胞が分裂しても遺伝子が受け継がれる。CAR-T細胞の製造に使われる。"],
+cell:["生きた細胞を薬として体に入れる治療。","患者さん本人や他人の細胞を加工・培養して投与する。体の中で増えたり、物質を出したりして働く。"],
+cartm:["がん細胞を見つける受容体の遺伝子を組み込んだ、患者さん自身のT細胞。","T細胞を取り出して、がん細胞表面のタンパク質に結合する受容体（CAR）を作らせ、増やして体に戻す。"],
+msc:["骨髄などからとった幹細胞を培養し、過剰な免疫反応を抑えるために使う。","間葉系幹細胞は、免疫を調節する物質を出す。他人の細胞から作って保存しておける。"],
+gene:["細胞のDNAの配列を直接書き換える治療。","Cas9という酵素とガイドRNAで、狙った場所のDNAを切る。細胞が切れ目を直すときに配列が変わる。"],
+radio:["がんに集まる分子に放射線を出す物質をつけ、がんの近くから放射線を当てる薬。","がん細胞の表面のタンパク質に結合する分子に、放射性物質をつける。放射線が近くのがん細胞のDNAを壊す。画像で集まり方を確認できる。"],
+vaccine:["病原体の一部などを体に入れ、前もって免疫を作っておく薬。","免疫は一度出会った病原体を覚える。ワクチンでこの記憶を作っておくと、本物の病原体が来たときに素早く防げる。"],
+micro:["生きた細菌を薬として使う。腸内細菌の状態を回復させる。","抗菌薬などで腸内細菌が減ると、特定の菌が増えて下痢を繰り返すことがある。健康な腸内細菌を入れて、その再発を防ぐ。"]
+};
+for(const m of MODS){const v=MLV[m.id];if(v){m.l1=v[0];m.l2=v[1];}}
+Object.assign(MODNODE_DEFAULT,{fus:"fcfus",prot:"recomb",na:"na",gene:"aav",vac:"vaccine"});
+Object.assign(MODNODE_OVR,{nus:{na:"aso"},pcsk9si:{na:"sirna"},rebal:{na:"sirna",ab:"igg"},emi:{ab:"bsab"},il5:{ab:"fceng"},entry:{ab:"fceng"},ona:{gene:"aav"},gt:{gene:"aav"},abat:{fus:"fcfus"},tnf:{fus:"fcfus"},fac:{fus:"fcfus"}});
+for(const k of DISEASE_ORDER) for(const c of DATA[k].classes) CLASS_DZ[c.id]=k;
+
+// ---------- rendering ----------
+let cur="diabetes", selId=null, filt="all", modSel="ab", LV=2;
+try{const s=parseInt(localStorage.getItem("moa-level"),10);if(s>=1&&s<=4)LV=s;}catch(e){}
+const LVNAME={1:"中学",2:"高校",3:"大学",4:"専門"};
+const reduceMotion=()=>window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+const narrow=()=>window.matchMedia("(max-width:820px)").matches;
+
+function textW(s){let w=0;for(const ch of s){const c=ch.codePointAt(0);w+= c>0x2E80?11: (/[A-Z0-9]/.test(ch)?7:6.2);}return w;}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+function autoLayout(d){
+  if(d.organs) return;
+  let y=10; d.organs=[];
+  for(const z of d.zones){
+    let x=18, rows=1;
+    for(const c of d.classes.filter(c=>c.sites.includes(z.id))){const w=Math.ceil(textW(c.abbr))+24;if(x+w>344){x=18;rows++;}x+=w+6;}
+    const h=30+rows*28+2; d.organs.push({id:z.id,label:z.label,sub:z.sub,x:10,y,w:340,h,zone:0}); y+=h+10;
+  }
+  d.view=[360,y]; d.extra="";
+}
+function drawMap(){
+  const d=DATA[cur], svg=document.getElementById("map");
+  autoLayout(d);
+  svg.setAttribute("viewBox",`0 0 ${d.view[0]} ${d.view[1]}`);
+  let h='<defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--muted)"/></marker></defs>';
+  const extraFirst = cur==="cancer";
+  if(extraFirst) h+=d.extra;
+  for(const o of d.organs){
+    h+= o.zone ? `<rect class="zoneline" x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" rx="8"/>`
+               : `<rect class="organ" x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" rx="10"/>`;
+    h+=`<text class="otitle" x="${o.x+10}" y="${o.y+18}">${esc(o.label)}</text>`;
+    if(o.sub) h+=`<text class="osub" x="${o.x+o.w-8}" y="${o.y+17}" text-anchor="end">${esc(o.sub)}</text>`;
+    let x=o.x+8, y=o.y+28;
+    for(const c of d.classes.filter(c=>c.sites.includes(o.id))){
+      const w=Math.ceil(textW(c.abbr))+24;
+      if(x+w>o.x+o.w-6){x=o.x+8;y+=28;}
+      const dim = filt!=="all" && !c.mod.includes(filt);
+      h+=`<g class="chip${c.id===selId?" sel":""}${dim?" dim":""}" data-id="${c.id}" tabindex="0" role="button" aria-label="${esc(c.name)}">`
+        +`<rect x="${x}" y="${y}" width="${w}" height="22" rx="11"/>`
+        +`<circle class="${c.ev==="deb"?"dot-deb":"dot-est"}" cx="${x+10}" cy="${y+11}" r="3.5"/>`
+        +`<text x="${x+17}" y="${y+15}">${esc(c.abbr)}</text></g>`;
+      x+=w+6;
+    }
+  }
+  if(!extraFirst) h+=d.extra;
+  svg.innerHTML=h;
+  svg.querySelectorAll(".chip").forEach(g=>{
+    g.addEventListener("click",()=>select(g.dataset.id,true));
+    g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(g.dataset.id,true);}});
+  });
+}
+
+function siteLabel(id){return DATA[cur].organs.find(o=>o.id===id)?.label||id;}
+function clsName(id){const dz=CLASS_DZ[id];return DATA[dz].classes.find(c=>c.id===id);}
+function drugList(arr,plain){return arr.map(g=>{const q=encodeURIComponent(g.en);
+  if(plain) return `<li><span>${esc(g.n)}</span></li>`;
+  return `<li><span>${esc(g.n)} <span class="mono" style="color:var(--muted)">${esc(g.en)}</span></span>`
+   +`<a href="https://dailymed.nlm.nih.gov/dailymed/search.cfm?query=${q}" target="_blank" rel="noopener">DailyMed</a>`
+   +(g.sm?`<a href="https://pubchem.ncbi.nlm.nih.gov/compound/${q}" target="_blank" rel="noopener">PubChem</a>`:"")+`</li>`;}).join("");}
+function srcList(src,en){const pm=`https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(en+" review")}`;
+  return (src||[]).map(s=>`<li><span class="kind">${esc(s.k)}</span><a href="${s.u}" target="_blank" rel="noopener">${esc(s.t)}</a></li>`).join("")
+   +`<li><span class="kind">検索</span><a href="${pm}" target="_blank" rel="noopener">PubMed で総説を探す（${esc(en)}）</a></li>`;}
+
+// simple 5-step flow figure (used at every level, highlighted by drug)
+function flowFigure(dzk,c){
+  const lv=DATA[dzk].lv, steps=lv.flow, n=steps.length, H=n*54+6;
+  let s="";
+  steps.forEach((t,i)=>{const y=6+i*54, hit=c&&c.step===i;
+    s+=`<g class="fn${hit?" hit":""}"><rect x="8" y="${y}" width="196" height="40" rx="8"/>${L(t,106,y+20)}</g>`;
+    s+=`<text class="fnum" x="20" y="${y+15}">${i+1}</text>`;
+    if(i<n-1) s+=A(106,y+40,106,y+54);
+    if(c&&c.step===i){s+=`<rect class="actpill" x="216" y="${y+4}" width="118" height="32" rx="16"/>`+L(c.act,275,y+20).replace(/<text /g,'<text class="acttext" ');
+      s+=`<path class="fld" d="M216 ${y+20} L206 ${y+20}" marker-end="url(#mh)"/>`;}
+    else if(!c&&lv.prob&&lv.prob[i]){s+=`<text class="probtext" x="214" y="${y+24}">← ${esc(lv.prob[i])}</text>`;}
+  });
+  return svgWrap([340,H],s,"病気の流れ");
+}
+function mechFigure(c){
+  const key=CLASS_FIG[c.id]; if(!key) return "";
+  const f=FIGS[key]; const others=Object.keys(f.map).filter(id=>id!==c.id);
+  const chips=others.map(id=>`<button class="lchip" data-c="${id}">${esc(clsName(id).abbr)}</button>`).join("");
+  return `<figure class="mech">${svgWrap(f.vb,f.draw(),"作用機序の模式図")}<figcaption>${esc(f.cap)} 青がこの薬の作用点。</figcaption>`
+   +(others.length?`<div class="figchips">同じ図に出てくる薬：${chips}</div>`:"")+`</figure>`;
+}
+function hitKeys(root,keys){keys.forEach(k=>root.querySelectorAll(`.fn[data-k="${k}"]`).forEach(g=>g.classList.add("hit")));}
+
+function drawDetail(){
+  const c=DATA[cur].classes.find(c=>c.id===selId), el=document.getElementById("detail");
+  const v=VER[c.ver];
+  const modBtns=c.mod.map(m=>{const node=(MODNODE_OVR[c.id]||{})[m]||MODNODE_DEFAULT[m];
+    return `<button class="badge blink" data-m="${node}" title="モダリティの解説へ">${MOD[m]}</button>`;}).join("");
+  const head=`<h2>${esc(c.name)}</h2><div class="en">${esc(c.en)}</div>
+   <div class="badges">${modBtns}${c.ev==="deb"?'<span class="badge b-deb">機序に議論あり</span>':""}<span class="badge ${v.c}">${v.t}</span></div>`;
+  const flow=`<figure class="mech"><div class="figlabel">この薬が効く段階</div>${flowFigure(cur,c)}</figure>`;
+  let body="";
+  if(LV===1){
+    body=`<p class="lvtext">${esc(c.l1||c.moa)}</p>${flow}<dl><dt>代表的な薬</dt><dd><ul class="drugs">${drugList(c.drugs,true)}</ul></dd></dl>`;
+  }else if(LV===2){
+    body=`<p class="lvtext">${esc(c.l2||c.moa)}</p>${flow}${mechFigure(c)}
+     <dl><dt>標的</dt><dd class="mono">${esc(c.target)}</dd><dt>代表的な薬</dt><dd><ul class="drugs">${drugList(c.drugs,true)}</ul></dd><dt>主な注意点</dt><dd class="caution">${esc(c.caution)}</dd></dl>`;
+  }else{
+    body=`${mechFigure(c)}
+     <dl>
+      <dt>標的</dt><dd class="mono">${esc(c.target)}</dd>
+      <dt>作用部位</dt><dd>${c.sites.map(siteLabel).join("・")}</dd>
+      <dt>作用機序</dt><dd>${esc(c.moa)}</dd>
+      ${LV===4&&c.l4?`<dt>専門的な補足</dt><dd class="note">${esc(c.l4)}</dd>`:""}
+      <dt>代表薬</dt><dd><ul class="drugs">${drugList(c.drugs)}</ul></dd>
+      <dt>主な注意点</dt><dd class="caution">${esc(c.caution)}</dd>
+      <dt>出典</dt><dd><ul class="src">${srcList(c.src,c.en+" mechanism of action")}</ul></dd>
+     </dl>${LV===3?flow:""}`;
+  }
+  el.innerHTML=head+body;
+  const key=CLASS_FIG[c.id]; if(key) hitKeys(el,FIGS[key].map[c.id]||[]);
+  el.querySelectorAll(".lchip").forEach(b=>b.addEventListener("click",()=>select(b.dataset.c,false)));
+  el.querySelectorAll(".blink").forEach(b=>b.addEventListener("click",()=>goModality(b.dataset.m)));
+}
+
+function drawOverview(){
+  const d=DATA[cur], lv=d.lv;
+  document.getElementById("intro").innerHTML=`<span class="lvtag">${LVNAME[LV]}レベル</span>${esc(lv["l"+LV]||d.intro)}`;
+  document.getElementById("dflow").innerHTML=`<div class="figlabel">${esc(DNAME[cur])}の流れ</div>`+flowFigure(cur,null);
+  document.getElementById("stats").innerHTML=lv.stats.map(s=>{const src=SRC[s.s];
+    return `<div class="stat"><div class="slab">${esc(s.l)}</div><div class="sval">${esc(s.v)}</div>`
+     +`<div class="smeta">${esc(s.y)}${s.y?" · ":""}<a href="${src.u}" target="_blank" rel="noopener">${esc(src.k)}：${esc(src.t)}</a></div></div>`;}).join("");
+}
+
+function scrollTo(id){if(narrow()) document.getElementById(id).scrollIntoView({behavior:reduceMotion()?"auto":"smooth",block:"start"});}
+function select(id,scroll){
+  selId=id;
+  document.querySelectorAll("#map .chip").forEach(g=>g.classList.toggle("sel",g.dataset.id===id));
+  drawDetail();
+  if(scroll) scrollTo("detail");
+}
+function drawFilters(){
+  const used=new Set(DATA[cur].classes.flatMap(c=>c.mod));
+  const opts=[["all","すべて"],...Object.entries(MOD).filter(([k])=>used.has(k))];
+  const f=document.getElementById("filters");
+  f.innerHTML=opts.map(([k,l])=>`<button class="fbtn" id="f-${k}" aria-pressed="${k===filt}" data-k="${k}">${l}</button>`).join("");
+  f.querySelectorAll(".fbtn").forEach(b=>b.addEventListener("click",()=>{filt=b.dataset.k;drawFilters();drawMap();}));
+}
+
+// ---------- modality view ----------
+function drawTree(){
+  const tops=MODS.filter(m=>!m.p), kids=p=>MODS.filter(m=>m.p===p);
+  const node=(m,top)=>`<li><button class="tnode${top?" top":""}" data-m="${m.id}" aria-current="${m.id===modSel}"><span>${esc(m.name)}</span></button>`
+    +(kids(m.id).length?`<ul>${kids(m.id).map(k=>node(k,false)).join("")}</ul>`:"")+`</li>`;
+  const t=document.getElementById("tree");
+  t.innerHTML=`<ul>${tops.map(m=>node(m,true)).join("")}</ul>`;
+  t.querySelectorAll(".tnode").forEach(b=>b.addEventListener("click",()=>{selectMod(b.dataset.m);scrollTo("mdetail");}));
+}
+function drawModDetail(){
+  const m=MODBY[modSel], el=document.getElementById("mdetail"), v=VER[m.ver];
+  const parent=m.p?MODBY[m.p]:null, kids=MODS.filter(k=>k.p===m.id);
+  const links=m.links.filter(id=>CLASS_DZ[id]).map(id=>{const c=clsName(id);return `<button class="lchip" data-c="${id}">${esc(DNAME[CLASS_DZ[id]])}：${esc(c.name)}</button>`;}).join("");
+  const fig=MFIG[m.fig]?`<figure class="mfig">${svgWrap([340,184],MFIG[m.fig](),m.name+"の模式図")}</figure>`:"";
+  const kidsHTML=kids.length?`<dt>下位分類</dt><dd><div class="figchips" style="margin:0">${kids.map(k=>`<button class="lchip" data-m="${k.id}">${esc(k.name)}</button>`).join("")}</div></dd>`:"";
+  const linksHTML=links?`<dt>疾患別の関連薬</dt><dd><div class="figchips" style="margin:0">${links}</div></dd>`:"";
+  let body="";
+  if(LV<=2){
+    body=`<p class="lvtext">${esc(LV===1?m.l1:m.l2)}</p>${fig}<dl>
+     ${m.ex.length?`<dt>代表例</dt><dd><ul class="drugs">${drugList(m.ex,true)}</ul></dd>`:""}${kidsHTML}${linksHTML}</dl>`;
+  }else{
+    body=`${fig}<dl>
+     <dt>定義・構造</dt><dd>${esc(m.def)}</dd>
+     <dt>作用の仕組み</dt><dd>${esc(m.how)}</dd>
+     <dt>大きさ</dt><dd class="mono">${esc(m.mw)}</dd>
+     <dt>投与経路</dt><dd>${esc(m.route)}</dd>
+     ${LV===4&&m.eng?`<dt>設計のポイント</dt><dd><ul class="englist">${m.eng.map(e=>`<li>${esc(e)}</li>`).join("")}</ul></dd>`:""}
+     <dt>強み</dt><dd>${esc(m.pros)}</dd>
+     <dt>課題</dt><dd class="caution">${esc(m.cons)}</dd>
+     ${m.note?`<dt>補足</dt><dd class="note">${esc(m.note)}</dd>`:""}
+     ${kidsHTML}
+     ${m.ex.length?`<dt>代表例</dt><dd><ul class="drugs">${drugList(m.ex)}</ul></dd>`:""}
+     ${linksHTML}
+     <dt>出典</dt><dd><ul class="src">${srcList(m.src,m.en)}</ul></dd></dl>`
+     +(LV===3&&m.eng?`<p class="hint">設計のポイント（アミノ酸置換・化学修飾など）は専門レベルで表示されます。</p>`:"");
+  }
+  el.innerHTML=`<div class="crumb">${parent?`<button data-m="${parent.id}">${esc(parent.name)}</button> › `:"モダリティ › "}${esc(m.name)}</div>
+   <h2>${esc(m.name)}</h2><div class="en">${esc(m.en)}</div>
+   <div class="badges"><span class="badge ${v.c}">${v.t}</span></div>${body}`;
+  el.querySelectorAll("[data-m]").forEach(b=>b.addEventListener("click",()=>selectMod(b.dataset.m)));
+  el.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>goDisease(b.dataset.c)));
+}
+function selectMod(id){modSel=id;document.querySelectorAll("#tree .tnode").forEach(b=>b.setAttribute("aria-current",String(b.dataset.m===id)));drawModDetail();}
+
+function drawSizeChart(){
+  const svg=document.getElementById("sizeChart"), rowH=20, top=10, x0=150, x1=348, lo=2, hi=7;
+  const H=top+SIZES.length*rowH+26; svg.setAttribute("viewBox",`0 0 360 ${H}`);
+  const X=v=>x0+(Math.log10(v)-lo)/(hi-lo)*(x1-x0);
+  let h="";
+  ["100","1k","10k","100k","1M","10M"].forEach((t,i)=>{const x=x0+i*(x1-x0)/5;h+=`<line class="sc-grid" x1="${x}" y1="${top-4}" x2="${x}" y2="${H-22}"/><text class="sc-tick" x="${x}" y="${H-8}" text-anchor="middle">${t}</text>`;});
+  h+=`<text class="sc-tick" x="${x0-18}" y="${H-8}" text-anchor="end">（Da）</text>`;
+  SIZES.forEach(([n,v,c],i)=>{const y=top+i*rowH+10, x=X(v);
+    h+=`<text class="sc-lab" x="${x0-8}" y="${y+4}" text-anchor="end">${esc(n)}</text>`
+     +`<line x1="${x0}" y1="${y}" x2="${x}" y2="${y}" stroke="var(--${c})" stroke-width="2" opacity=".45"/><circle cx="${x}" cy="${y}" r="4.5" fill="var(--${c})"/>`;});
+  svg.innerHTML=h;
+}
+
+function goModality(id){show("modality");selectMod(id);window.scrollTo({top:0,behavior:reduceMotion()?"auto":"smooth"});}
+function goDisease(id){show(CLASS_DZ[id]);select(id,false);scrollTo("detail");}
+
+function drawTabs(){
+  const t=document.getElementById("dtabs");
+  t.innerHTML=DISEASE_ORDER.map(k=>`<button class="tab" role="tab" id="tab-${k}" aria-selected="${k===cur}" data-d="${k}">${esc(DNAME[k])}</button>`).join("");
+  t.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>show(b.dataset.d)));
+}
+function drawLevels(){
+  document.querySelectorAll(".lvbtn").forEach(b=>b.setAttribute("aria-checked",String(+b.dataset.l===LV)));
+}
+function setLevel(l){LV=l;try{localStorage.setItem("moa-level",String(l));}catch(e){}drawLevels();
+  if(document.getElementById("modView").hidden){drawOverview();drawDetail();}else drawModDetail();}
+
+function show(dz){
+  const isMod=dz==="modality";
+  document.querySelectorAll(".vtab").forEach(t=>t.setAttribute("aria-selected",String((t.dataset.v==="modality")===isMod)));
+  document.getElementById("disView").hidden=isMod; document.getElementById("modView").hidden=!isMod;
+  document.getElementById("jsonsum").textContent=isMod?"モダリティのデータ（JSON）を表示":"この疾患のデータ（JSON）を表示";
+  if(isMod){document.getElementById("json").textContent=JSON.stringify(MODS,null,2);drawTree();drawModDetail();return;}
+  if(cur!==dz||!selId){cur=dz; filt="all"; selId=DATA[dz].default;}
+  document.querySelectorAll("#dtabs .tab").forEach(t=>t.setAttribute("aria-selected",String(t.dataset.d===dz)));
+  const tb=document.getElementById("tab-"+dz), box=document.getElementById("dtabs"); if(tb) box.scrollLeft=Math.max(0,tb.offsetLeft-box.offsetLeft-24);
+  document.getElementById("json").textContent=JSON.stringify({overview:DATA[dz].lv,classes:DATA[dz].classes},null,2);
+  drawOverview(); drawFilters(); drawMap(); drawDetail();
+}
+document.querySelectorAll(".vtab").forEach(t=>t.addEventListener("click",()=>show(t.dataset.v==="modality"?"modality":cur)));
+document.querySelectorAll(".lvbtn").forEach(b=>b.addEventListener("click",()=>setLevel(+b.dataset.l)));
+drawTabs(); drawLevels(); drawSizeChart();
+const H0=location.hash.slice(1);
+show(H0==="modality"?"modality":(DATA[H0]?H0:"diabetes"));
+
+</script>
+
+</body>
+</html>
