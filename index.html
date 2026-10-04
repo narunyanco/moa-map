@@ -947,7 +947,7 @@ kidney:{vb:[340,196],cap:"糸球体でろ過されたグルコースの大部分
  draw:()=>T(8,22,"尿細管腔（原尿）")+T(124,22,"近位尿細管細胞")+T(262,22,"血液")
   +`<rect class="fcfill" x="110" y="32" width="120" height="150" rx="10"/>`
   +B("sglt2",86,60,48,24,"SGLT2")+B("glut2",206,60,48,24,"GLUT2")+T(10,54,"Glc + Na⁺")
-  +A(20,72,86,72)+A(134,72,206,72)+A(254,72,322,72)
+  +A(20,72,86,72)+A(134,72,206,72)+A(254,72,322,72)+T(170,66,"Glc","tx","middle")+T(288,66,"Glc","tx","middle")
   +B("urine",10,140,84,34,"尿糖排泄↑")+A(50,90,50,140,1)+T(120,120,"ろ過された糖の大半を","txi")+T(120,134,"ここで再吸収","txi"),
  map:{sglt2:["sglt2","urine"]}},
 gut:{vb:[340,150],cap:"二糖類は小腸刷子縁膜のα-グルコシダーゼで単糖に分解されてから吸収される。阻害すると分解が遅れ、糖の吸収が小腸の下部へずれて食後の血糖上昇がなだらかになる。",
@@ -986,12 +986,12 @@ immune:{vb:[340,250],cap:"T細胞は通常、TCRでMHC上の抗原を認識す�
   +B("cd3",88,150,56,22,"CD3")+B("bsab",150,150,40,22,"bsAb")+B("ag1",196,150,56,22,"抗原")+`<path class="fl" d="M144 161 L150 161 M190 161 L196 161"/>`
   +B("car",88,190,56,22,"CAR")+B("ag2",196,190,56,22,"抗原")+`<path class="fl" d="M144 201 L196 201"/>`,
  map:{pd1:["pd1","pdl1"],ctla4:["ctla","dc"],bite:["bsab","cd3","ag1"],cart:["car","ag2"]}},
-adc:{vb:[340,262],cap:"ADCは抗原に結合して細胞内に取り込まれ、リソソームでリンカーが切れてペイロードを放出する。膜透過性のペイロード（DXdなど）は隣接する細胞にも作用する（バイスタンダー効果）。",
- draw:()=>`<g transform="translate(80,4) scale(0.52)">${igg({pay:true})}</g>`+T(130,20,"抗体＋リンカー＋ペイロード","txi")
-  +C(10,52,320,202,"がん細胞")+B("ag",48,42,64,22,"抗原")
+adc:{vb:[340,290],cap:"ADCは抗原に結合して細胞内に取り込まれ、リソソームでリンカーが切れてペイロードを放出する。膜透過性のペイロード（DXdなど）は隣接する細胞にも作用する（バイスタンダー効果）。",
+ draw:()=>`<g transform="translate(80,32) scale(0.52)">${igg({pay:true})}</g>`+T(130,36,"抗体＋リンカー＋ペイロード","txi")
+  +`<g transform="translate(0,28)">`+C(10,52,320,202,"がん細胞")+B("ag",48,42,64,22,"抗原")
   +B("s2",24,80,136,28,"① エンドサイトーシス")+B("s3",24,126,136,34,"② リソソームで\nリンカー切断")+B("s4",186,126,136,34,"③ ペイロード放出")
   +B("s5",186,190,136,34,"④ DNA損傷・\n微小管阻害")+B("s6",24,190,136,34,"⑤ 膜透過性なら\n隣接細胞へ")
-  +A(80,64,80,80)+A(92,108,92,126)+A(160,143,186,143)+A(254,160,254,190)+A(200,160,140,190,1),
+  +A(80,64,80,80)+A(92,108,92,126)+A(160,143,186,143)+A(254,160,254,190)+A(200,160,140,190,1)+`</g>`,
  map:{adc:["ag","s2","s3","s4","s5","s6"]}},
 vegf:{vb:[340,196],cap:"低酸素のがん細胞が分泌するVEGF-Aが血管内皮のVEGFR2に結合し、チロシンキナーゼを介して血管新生を起こす。抗体はリガンドか受容体に結合し、低分子TKIは細胞内のキナーゼを阻害する。",
  draw:()=>B("tum",8,30,92,40,"がん細胞\n（低酸素）")+B("vegf",110,38,60,24,"VEGF-A")+C(200,14,134,176,"血管内皮細胞",1)
@@ -1007,9 +1007,10 @@ const CLASS_FIG={insulin:"target",su:"beta",glinide:"beta",dpp4:"beta",glp1:"bet
 // IgG drawn with hinge at (0,0); used at different scales
 function igg(o={}){
   const armR=o.altR?"alt":"hc", lightR=o.altR?"alt":"lc";
-  let s=`<rect class="hc" x="-13" y="4" width="12" height="62" rx="4"/><rect class="hc" x="1" y="4" width="12" height="62" rx="4"/>`;
-  s+=`<g transform="rotate(-36)"><rect class="hc" x="-13" y="-62" width="12" height="60" rx="4"/><rect class="lc" x="-27" y="-58" width="11" height="48" rx="4"/><rect class="cdr" x="-27" y="-67" width="26" height="6" rx="2"/></g>`;
-  s+=`<g transform="rotate(36)"><rect class="${armR}" x="1" y="-62" width="12" height="60" rx="4"/><rect class="${lightR}" x="16" y="-58" width="11" height="48" rx="4"/><rect class="cdr" x="1" y="-67" width="26" height="6" rx="2"/></g>`;
+  let s=`<rect class="hc" x="-13" y="4" width="12" height="62" rx="4"/><rect class="${armR}" x="1" y="4" width="12" height="62" rx="4"/>`;
+  // CDRは可変領域（VH・VL）の先端のループ。各鎖の先端に置く
+  s+=`<g transform="rotate(-36)"><rect class="hc" x="-13" y="-62" width="12" height="60" rx="4"/><rect class="lc" x="-27" y="-62" width="11" height="48" rx="4"/><rect class="cdr" x="-13" y="-62" width="12" height="7" rx="3"/><rect class="cdr" x="-27" y="-62" width="11" height="7" rx="3"/></g>`;
+  s+=`<g transform="rotate(36)"><rect class="${armR}" x="1" y="-62" width="12" height="60" rx="4"/><rect class="${lightR}" x="16" y="-62" width="11" height="48" rx="4"/><rect class="cdr" x="1" y="-62" width="12" height="7" rx="3"/><rect class="cdr" x="16" y="-62" width="11" height="7" rx="3"/></g>`;
   if(o.pay){for(const [x,y] of [[-40,-20],[40,-20],[-19,30],[19,30]]) s+=`<path class="strk" d="M${x>0?x-8:x+8} ${y} L${x} ${y}"/><circle class="pay" cx="${x}" cy="${y}" r="5"/>`;}
   return s;
 }
@@ -1028,7 +1029,7 @@ deg:()=>`<circle class="blob" cx="66" cy="86" r="40"/><circle class="blob" cx="2
   +T(135,150,"PROTAC：標的リガンド–リンカー–E3リガンド","txi","middle"),
 pep:()=>beads(20,22,70,14,[2,13])+`<path class="strk3" d="M288 74 L292 96 L300 104 L296 118 L304 126 L300 140"/>`
   +`<ellipse class="blob" cx="250" cy="146" rx="56" ry="20"/>`+T(250,150,"アルブミン","txi","middle")
-  +T(36,52,"Aib（2）","txi","middle")+T(190,52,"Aib（13）","txi","middle")+T(288,52,"K20","txi","middle")+T(286,104,"C20脂肪二酸","tx","end")
+  +T(36,52,"Aib（2）","txi","middle")+T(190,52,"Aib（13）","txi","middle")+T(288,52,"K20","txi","middle")+T(280,114,"C20脂肪二酸","tx","end")
   +T(20,100,"チルゼパチド（39残基）のN末端側20残基を表示","tx")+T(20,116,"青：非天然アミノ酸Aibに置換した位置","tx"),
 cyc:()=>{let s="";const cx=110,cy=86,r=56,nm=[1,3,4,6,9,10,11];for(let i=1;i<=11;i++){const a=-Math.PI/2+(i-1)*2*Math.PI/11;s+=`<circle class="bead${nm.includes(i)?" hit":""}" cx="${(cx+r*Math.cos(a)).toFixed(1)}" cy="${(cy+r*Math.sin(a)).toFixed(1)}" r="9"/>`;}
   return `<circle class="fc" cx="${cx}" cy="${cy}" r="56"/>`+s+T(110,90,"シクロスポリン","txb","middle")+T(190,60,"11残基の環状ペプチド","txi")+T(190,78,"青：N-メチル化アミノ酸","tx")+T(190,94,"（11残基中7残基）","tx")+T(190,118,"環化とN-メチル化で","tx")+T(190,132,"分解耐性と膜透過性","tx");},
@@ -1036,26 +1037,26 @@ insulin:()=>beads(21,20,56,13.5,[21])+beads(30,20,118,9.6,[28,29,30])
   +`<path class="strk3" d="M${20+5*13.5} 56 Q${20+7.5*13.5} 36 ${20+10*13.5} 56"/>`
   +`<path class="strk3" d="M${20+6*13.5} 60 L${20+6*9.6} 114"/><path class="strk3" d="M${20+19*13.5} 60 L${20+18*9.6} 114"/>`
   +T(4,30,"A鎖（21残基）","txi")+T(4,146,"B鎖（30残基）","txi")+T(300,48,"A21","txi","middle")+T(298,140,"B28–B30","txi","middle")
-  +T(140,30,"オレンジ：ジスルフィド結合","tx"),
+  +T(140,30,"オレンジ：ジスルフィド結合","tx")+T(140,172,"青：アナログで改変された位置","tx"),
 fcfus:()=>`<g transform="translate(110,92)"><rect class="hc" x="-13" y="4" width="12" height="62" rx="4"/><rect class="hc" x="1" y="4" width="12" height="62" rx="4"/>`
   +`<g transform="rotate(-30)"><ellipse class="alt" cx="-7" cy="-20" rx="10" ry="17"/><ellipse class="lc" cx="-7" cy="-54" rx="10" ry="17"/></g><g transform="rotate(30)"><ellipse class="alt" cx="7" cy="-20" rx="10" ry="17"/><ellipse class="lc" cx="7" cy="-54" rx="10" ry="17"/></g></g>`
   +T(170,46,"受容体の細胞外ドメイン","txi")+T(170,60,"（リガンドを捕捉するおとり）","tx")+T(170,128,"IgG1 Fc","txi")+T(170,142,"FcRnで再利用→半減期延長","tx")+A(168,124,126,130),
-igg:()=>`<g transform="translate(96,96)">${igg()}</g>`+T(30,22,"Fab（抗原結合）","txi")+T(150,18,"CDR（青）","txi")+A(150,22,132,34)
+igg:()=>`<g transform="translate(96,96)">${igg()}</g>`+T(30,22,"Fab（抗原結合）","txi")+T(150,18,"CDR（青）","txi")+A(150,22,137,42)
   +T(126,150,"Fc","txb")+T(150,112,"重鎖×2（濃）","txi")+T(150,126,"軽鎖×2（淡）","txi")+T(150,150,"FcγR・FcRn・補体が結合","tx")+T(150,166,"IgG 約150 kDa","tx"),
-fceng:()=>`<g transform="translate(86,90)">${igg()}<circle class="pay" cx="-7" cy="44" r="5"/><circle class="pay" cx="7" cy="44" r="5"/><circle cx="0" cy="12" r="5" class="alt"/><circle cx="-7" cy="26" r="4" fill="var(--ev-est)"/></g>`
+fceng:()=>`<g transform="translate(86,90)">${igg()}<circle class="pay" cx="-7" cy="36" r="5"/><circle class="pay" cx="7" cy="36" r="5"/><circle cx="0" cy="12" r="5" class="alt"/><circle cx="-7" cy="26" r="4" fill="var(--ev-est)"/></g>`
   +T(152,28,"S228P（IgG4ヒンジ安定化）","txi")+A(150,30,92,100,1)
   +T(152,60,"LALA・N297A：エフェクター除去","txi")+T(152,74,"低フコース化：ADCC増強","txi")+A(150,70,84,114,1)
-  +T(152,134,"YTE・LS：FcRn結合（pH 6）↑","txi")+T(152,148,"→ 半減期延長","tx")+A(150,136,98,134,1)
+  +T(152,134,"YTE・LS：FcRn結合（pH 6）↑","txi")+T(152,148,"→ 半減期延長","tx")+A(150,136,98,127,1)
   +T(10,176,"番号はEU番号。CH2–CH3境界にFcRn結合部位がある","tx"),
 adcm:()=>`<g transform="translate(96,96)">${igg({pay:true})}</g>`+T(160,40,"抗体：抗原を選ぶ","txi")+T(160,64,"リンカー：血中で安定、","txi")+T(160,78,"細胞内で切断","txi")
   +T(160,102,"ペイロード（オレンジ）：","txi")+T(160,116,"MMAE・DXd・DM1 など","txi")+T(160,140,"DAR：1抗体あたりの薬物数","txi"),
 bsab:()=>`<g transform="translate(78,98)">${igg({altR:true})}<rect x="-13" y="44" width="12" height="8" fill="var(--ev-est)"/><rect x="1" y="44" width="12" height="8" fill="var(--card)" stroke="var(--ev-est)"/></g>`
   +T(18,174,"IgG型（knobs-into-holes）","txi")
-  +`<rect class="cdr" x="196" y="78" width="22" height="18" rx="3"/><rect class="lc" x="220" y="78" width="22" height="18" rx="3"/><path class="strk" d="M242 87 L254 87"/><rect class="alt" x="254" y="78" width="22" height="18" rx="3"/><rect class="lc" x="278" y="78" width="22" height="18" rx="3"/>`
+  +`<rect class="hc" x="196" y="78" width="22" height="18" rx="3"/><rect class="lc" x="220" y="78" width="22" height="18" rx="3"/><path class="strk" d="M242 87 L254 87"/><rect class="alt" x="254" y="78" width="22" height="18" rx="3"/><rect class="lc" x="278" y="78" width="22" height="18" rx="3"/>`
   +T(219,70,"抗がん抗原","tx","middle")+T(277,70,"抗CD3","tx","middle")+T(248,122,"BiTE（scFv×2、約55 kDa）","txi","middle")+T(248,138,"Fcなし→半減期が短い","tx","middle"),
 frag:()=>`<g transform="translate(56,98) scale(0.8)">${igg()}</g>`+T(30,170,"IgG 150 kDa","tx")+A(104,96,136,96)
-  +`<g transform="translate(170,104)"><rect class="hc" x="-6" y="-60" width="12" height="60" rx="4"/><rect class="lc" x="9" y="-56" width="11" height="48" rx="4"/><rect class="cdr" x="-6" y="-66" width="26" height="6" rx="2"/></g>`
-  +T(150,130,"Fab 約50 kDa","txi")+`<rect class="hc" x="262" y="70" width="14" height="34" rx="4"/><rect class="cdr" x="262" y="64" width="14" height="6" rx="2"/>`+T(244,130,"VHH 約15 kDa","txi"),
+  +`<g transform="translate(170,104)"><rect class="hc" x="-6" y="-60" width="12" height="60" rx="4"/><rect class="lc" x="9" y="-60" width="11" height="48" rx="4"/><rect class="cdr" x="-6" y="-60" width="12" height="7" rx="3"/><rect class="cdr" x="9" y="-60" width="11" height="7" rx="3"/></g>`
+  +T(150,130,"Fab 約50 kDa","txi")+`<rect class="hc" x="262" y="70" width="14" height="34" rx="4"/><rect class="cdr" x="262" y="70" width="14" height="7" rx="3"/>`+T(244,130,"VHH 約15 kDa","txi"),
 na:()=>`<path class="strk2" d="M16 40 L130 40"/>`+T(16,28,"ASO（一本鎖）","txi")
   +`<path class="strk2" d="M180 34 L300 34"/><path class="strk3" d="M184 46 L304 46"/>`+T(180,22,"siRNA（二本鎖 約21 bp）","txi")
   +`<path class="strk4" d="M30 150 L30 104 Q30 84 50 84 Q70 84 70 104 L70 150"/>`+[110,122,134].map(y=>`<path class="strk" d="M30 ${y} L70 ${y}"/>`).join("")+T(90,120,"アプタマー","txi")+T(90,134,"（立体構造で結合）","tx")
@@ -1065,7 +1066,7 @@ aso:()=>`<path class="strk" d="M10 104 L330 104"/>`+T(10,124,"標的RNA（mRNA�
   +[...Array(20)].map((_,i)=>`<path class="strk" d="M${66+i*10} 92 L${66+i*10} 104" stroke-width="0.8"/>`).join("")
   +T(90,72,"ウィング","tx","middle")+T(160,72,"ギャップ（DNA）","tx","middle")+T(230,72,"ウィング","tx","middle")
   +`<ellipse class="blob" cx="292" cy="40" rx="30" ry="16"/>`+T(292,44,"RNase H","tx","middle")+A(270,52,204,80)
-  +T(10,152,"ウィング：2'-MOE・LNAなどで修飾／RNase HがRNA鎖を切断","tx"),
+  +T(10,152,"図はギャップマー型。ウィングは2'-MOE・LNAなどで修飾","tx")+T(10,166,"RNase HがRNA鎖を切断する","tx"),
 sirna:()=>`<path class="strk2" d="M14 40 L104 40"/><path class="strk3" d="M18 52 L108 52"/>`+T(14,26,"siRNA","txi")+A(116,46,146,46)
   +`<ellipse class="blob" cx="210" cy="46" rx="56" ry="26"/><path class="strk2" d="M174 48 L244 48"/>`+T(210,36,"RISC（Ago2）","txi","middle")
   +T(18,74,"パッセンジャー鎖は除かれる","tx")+A(210,72,210,98)
@@ -1082,7 +1083,7 @@ apt:()=>`<path class="strk4" d="M70 160 L70 92 Q70 64 96 64 Q122 64 122 92 L122 
   +`<path class="blob" d="M150 40 Q220 20 260 60 Q290 100 250 130 Q200 150 170 120 Q140 90 150 40 Z"/>`+T(214,92,"標的タンパク質","txi","middle")
   +A(124,74,156,74)+T(20,40,"一本鎖DNA/RNAが","txi")+T(20,54,"折りたたまれて結合","txi"),
 cartm:()=>`<rect class="fcfill" x="0" y="96" width="340" height="16"/>`+T(250,108,"T細胞膜","tx")
-  +`<rect class="cdr" x="112" y="16" width="22" height="26" rx="5"/><rect class="lc" x="136" y="16" width="22" height="26" rx="5"/>`+`<path class="strk" d="M135 42 L135 96"/>`
+  +`<rect class="hc" x="112" y="16" width="22" height="26" rx="5"/><rect class="lc" x="136" y="16" width="22" height="26" rx="5"/>`+`<path class="strk" d="M135 42 L135 96"/>`
   +`<rect class="hc" x="129" y="96" width="12" height="16"/><rect class="alt" x="120" y="118" width="30" height="20" rx="4"/><rect class="pay" x="120" y="142" width="30" height="28" rx="4"/>`
   +T(166,32,"scFv（抗原認識）","txi")+T(166,70,"ヒンジ","txi")+T(166,108,"膜貫通部","txi")+T(166,132,"共刺激（CD28／4-1BB）","txi")+T(166,160,"CD3ζ（活性化シグナル）","txi"),
 virus:()=>hexa(80,90,52,"strk")+`<path class="strk3" d="M58 80 Q80 60 100 84 Q82 108 62 100"/>`+T(80,160,"ウイルス粒子","txi","middle")
@@ -1131,7 +1132,7 @@ lipid:{vb:[340,244],cap:"肝細胞ではHMG-CoA還元酵素の経路でコレス
   +B("srebp",150,124,110,34,"SREBP2活性化\n→ LDLR転写↑")+A(205,36,205,50)+A(205,72,205,86)+A(205,108,205,124,1)+T(212,120,"減ると")
   +B("ldlr",270,86,62,34,"LDL\n受容体")+A(260,141,284,120)
   +B("ldl",270,204,62,34,"LDL")+A(301,204,301,120)+T(248,198,"取り込み")
-  +B("pcsk9",150,204,96,34,"PCSK9\n（分泌される）")+A(232,204,280,122,1)
+  +B("pcsk9",150,204,96,34,"PCSK9\n（分泌される）")+INH(232,204,280,124)+T(260,164,"分解へ","tx")
   +B("ppar",8,96,112,34,"PPARα（核内）\n中性脂肪の分解↑"),
  map:{statin:["hmg","chol","srebp","ldlr"],eze:["gut"],pcsk9ab:["pcsk9","ldlr"],pcsk9si:["pcsk9"],fib:["ppar"]}},
 ad:{vb:[340,244],cap:"APPから切り出されたAβが凝集してオリゴマー・プロトフィブリル、老人斑になる。抗Aβ抗体は凝集体に結合し、ミクログリアのFc受容体を介した除去を促す。シナプスではAChEがアセチルコリンを分解し、NMDA受容体がグルタミン酸の信号を受ける。タウの凝集を標的とする承認薬はまだない。",
@@ -1152,7 +1153,7 @@ hemo:{vb:[340,250],cap:"組織因子と第VIIa因子が反応を始め、第IXa�
  draw:()=>B("tf",8,10,112,34,"組織因子\n＋第VIIa因子")+B("tfpi",150,10,72,34,"TFPI\n（抑制）")+INH(150,27,120,27)
   +B("f9",8,64,100,22,"第IXa因子")+B("f8",8,96,100,22,"第VIIIa因子")+A(64,44,64,64,1)
   +B("ten",220,64,112,34,"テナーゼ複合体\n（増幅）")+A(108,75,220,78)+A(108,107,220,88)
-  +B("emi",116,132,96,22,"二重特異性抗体")+A(212,140,248,98,1)+T(116,170,"第VIIIa因子の代わりに")+T(116,183,"第IXa因子と第X因子をつなぐ")
+  +B("emi",116,132,96,22,"二重特異性抗体")+A(212,140,248,98,1)+T(8,172,"第VIIIa因子の代わりに")+T(8,185,"第IXa因子と第X因子をつなぐ")
   +B("f10",220,132,112,22,"第Xa因子")+A(276,98,276,132)
   +B("thr",220,176,112,22,"トロンビン")+A(276,154,276,176)+B("fib",220,218,112,22,"フィブリン → 止血")+A(276,198,276,218)
   +B("at",8,206,112,22,"アンチトロンビン")+INH(120,217,220,190),
